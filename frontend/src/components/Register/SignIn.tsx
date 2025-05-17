@@ -12,8 +12,16 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { signInUser } from "@/app/api/api";
+import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
+
+
 
 const SignIn = () => {
+
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -24,11 +32,11 @@ const SignIn = () => {
 
   const { toast } = useToast();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSignIn = (e: React.FormEvent) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
 
     const { email, password } = formData;
@@ -37,6 +45,49 @@ const SignIn = () => {
       toast({
         title: "Error",
         description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const payload = {
+      ...formData,
+      type: userType,
+    };
+
+    try {
+      const res = await signInUser(payload);
+      Cookies.set("token", res.token);
+
+      const userData = {
+        userType: "student", // Set this dynamically based on context
+        userDetails: res.userDetails,
+      };
+
+      localStorage.setItem("details", JSON.stringify(userData));
+
+      if (res.status === 200) {
+        toast({
+          title: "Sign in successful",
+          description: `Welcome back, ${userType}!`,
+        });
+        if (userType === "student") {
+          navigate("/dashboard/student");
+        } else {
+          navigate("/dashboard/company");
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: res.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "Sign in failed. Please try again.",
         variant: "destructive",
       });
       return;

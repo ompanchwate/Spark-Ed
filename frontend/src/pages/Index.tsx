@@ -1,16 +1,37 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SignIn from "@/components/Register/SignIn";
 import SignUp from "@/components/Register/SignUp";
 import { Button } from "@/components/ui/button";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 const Index = () => {
   const [activeView, setActiveView] = useState<"signin" | "signup">("signin");
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("details"));
+    const token = Cookies.get('token');
+
+    if (token && userData?.userType) {
+      if (userData.userType === "company") {
+        navigate("/dashboard/company");
+      } else if (userData.userType === "student") {
+        navigate("/dashboard/student");
+      }
+    } else {
+      setLoading(false);
+    }
+  }, [navigate]);
+
+  if (loading) return <div>Loading...</div>;
 
   return (
-    <ThemeProvider>
+    <>
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 dark:text-white p-4 md:p-8">
         <div className="absolute top-4 right-4">
           <ThemeToggle />
@@ -47,7 +68,7 @@ const Index = () => {
           © 2025 Spark-Ed. All rights reserved.
         </footer>
       </div>
-    </ThemeProvider>
+    </>
   );
 };
 

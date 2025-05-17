@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
 import {
   Mail,
   Lock,
@@ -20,35 +19,47 @@ import {
   Eye,
 } from "lucide-react";
 import { signUpUser } from "@/app/api/api"; // Adjust the import path as necessary
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
-
+  const navigate = useNavigate();
   const [userType, setUserType] = useState("student");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "",
+    password: ""
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const users = localStorage.getItem("details");
+    if (users) {
+      navigate("/dashboard/company");
+    }
+  }, [navigate]);
+
+  const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
 
     try {
-      if(userType === "student") {
-        const res = await signUpUser(formData, "student")
-        console.log(res)
-      }else{
-        const res = await signUpUser(formData, "company")
-        console.log(res)
-      }
+      // if (userType === "student") {
+      const payload = {
+        ...formData,
+        type: userType,
+      };
+      const res = await signUpUser(payload)
+
+      // console.log(res)
+      console.log(payload)
+
+      // }
       alert("Signup successful");
     } catch (error) {
       console.error(error);
@@ -71,13 +82,17 @@ const SignUp = () => {
           <div className="mb-4 flex gap-8 justify-center">
             <Button
               variant={userType === "student" ? "default" : "outline"}
-              onClick={() => setUserType("student")}
+              onClick={() => {
+                setUserType("student")
+              }}
             >
               Student
             </Button>
             <Button
               variant={userType === "company" ? "default" : "outline"}
-              onClick={() => setUserType("company")}
+              onClick={() => {
+                setUserType("company")
+              }}
             >
               Company
             </Button>

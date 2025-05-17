@@ -8,35 +8,38 @@ const API = axios.create({
     },
 });
 
-export const signUpUser = async (data, type) => {
+export const validateToken = async (token) => {
+  try {
+    const res = await API.get('/validate-token', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("res", res)
+    return res;
+  } catch (error) {
+    return { valid: false, error: error.response?.data?.message || 'Invalid token' };
+  }
+};
+
+export const signUpUser = async (data) => {
     try {
-        console.log(data, type)
-        if (type === "company") {
-            const response = await API.post("/signup/company", data);
-            return response.data;
-        }
 
-        const response = await API.post("/signup/student", data);
+        const response = await API.post("/signup", data);
         return response.data;
-
-
     } catch (error) {
         console.error("❌ Error during sign up:", error);
         throw error;
     }
 }
 
-// Example: Fetch companies
-export const fetchCompanies = async () => {
+export const signInUser = async (data) => {
     try {
-        const response = await API.get("/getcompanies");
+        const response = await API.post("/signin", data);
         return response.data;
+
     } catch (error) {
-        console.error("❌ Error fetching companies:", error);
+        console.error("❌ Error during sign up:", error);
         throw error;
     }
-};
-
-
-// Add more API functions here as needed
-// export const createCompany = (data) => API.post("/addCompany", data);
+}

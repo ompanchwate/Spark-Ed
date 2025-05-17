@@ -20,6 +20,24 @@ export const signUpStudent = async (req, res) => {
     }
 }
 
+export const signInStudent = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const [student] = await conn.query("SELECT * FROM student WHERE email = ? AND password = ?", [email, password]);
+        if (student.length === 0) {
+            return res.status(401).json({ message: "Invalid credentials" });
+        }
+
+        res.status(200).json({ status: 200, message: "Student signed in successfully", student: student[0] });
+
+    } catch (error) {
+        console.error("Error signing in student:", error);
+        res.status(500).json({ message: "Server Error" });
+    }
+}
+
+
 export const getStudents = async (req, res) => {
     try {
         const [rows] = await conn.query("SELECT * FROM student");

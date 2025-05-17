@@ -8,14 +8,14 @@ interface ThemeContextType {
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({ 
-  theme: "light", 
-  toggleTheme: () => {} 
+const ThemeContext = createContext<ThemeContextType>({
+  theme: "light",
+  toggleTheme: () => { }
 });
 
 export const useTheme = () => useContext(ThemeContext);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
