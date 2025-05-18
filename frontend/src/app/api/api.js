@@ -2,10 +2,10 @@ import axios from "axios";
 
 // Base URL of your backend server
 const API = axios.create({
-    baseURL: "http://localhost:3001/api", // make sure port matches your Express server
-    headers: {
-        "Content-Type": "application/json",
-    },
+  baseURL: "http://localhost:3001/api", // make sure port matches your Express server
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 export const validateToken = async (token) => {
@@ -23,23 +23,37 @@ export const validateToken = async (token) => {
 };
 
 export const signUpUser = async (data) => {
-    try {
+  try {
 
-        const response = await API.post("/signup", data);
-        return response.data;
-    } catch (error) {
-        console.error("❌ Error during sign up:", error);
-        throw error;
-    }
+    const response = await API.post("/signup", data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error during sign up:", error);
+    throw error;
+  }
 }
 
 export const signInUser = async (data) => {
-    try {
-        const response = await API.post("/signin", data);
-        return response.data;
+  try {
+    const response = await API.post("/signin", data);
+    return response.data;
 
-    } catch (error) {
-        console.error("❌ Error during sign up:", error);
-        throw error;
-    }
+  } catch (error) {
+    console.error("❌ Error during sign up:", error);
+    throw error;
+  }
+}
+
+export const addProject = async (data, token) => {
+  try {
+    const response = await API.post("/student/addproject", data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error while adding the project", error);
+    throw error;
+  }
 }

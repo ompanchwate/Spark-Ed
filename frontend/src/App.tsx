@@ -14,6 +14,7 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 import { ThemeProvider } from "./components/ThemeProvider";
 import Scholarships from "./pages/Student/scholarships";
 import StudentLayout from "./layouts/StudentLayout";
+import AddProject from "./pages/Student/addProject";
 
 const queryClient = new QueryClient();
 
@@ -38,8 +39,6 @@ const App = () => (
                   }
                 />
 
-
-
                 <Route
                   path="/dashboard/student"
                   element={
@@ -50,7 +49,10 @@ const App = () => (
                 >
                   <Route index element={<StudentDashboard />} />
                   <Route path="scholarships" element={<Scholarships />} />
+                  <Route path="addproject" element={<AddProject/>} />
                 </Route>
+
+
 
 
                 <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />

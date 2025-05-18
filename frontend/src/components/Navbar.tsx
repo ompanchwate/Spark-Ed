@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ThemeToggle } from "./ThemeToggle";
-import { Menu, Home, Search, Settings } from "lucide-react";
+import { Menu, Home, Search, Settings, LogOut } from "lucide-react";
+import { useUser } from "@/context/UserContext";
+import Cookies from "js-cookie";  
+import { useToast } from "@/hooks/use-toast";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -18,10 +21,27 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+const { toast } = useToast();
+  const navigate = useNavigate();
+  const { setUserDetails } = useUser(); // Access context
+
+  const handleLogout = () => {
+    localStorage.removeItem("details");
+    Cookies.remove("token");
+    // Clear context
+    setUserDetails(null);
+               toast({
+                title: "Signed out successfully",
+                description: "See you soon.",
+            });
+    navigate("/");
+  };
+
+
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? "bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg py-2" : "bg-gradient-to-r from-blue-500 to-purple-500 py-4"
       }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
@@ -41,11 +61,17 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
-              <Search className="h-4 w-4 mr-1" />
-              Search
-            </Button>
             <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/20"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-1" />
+              Log out
+            </Button>
+
           </div>
 
           {/* Mobile Navigation */}

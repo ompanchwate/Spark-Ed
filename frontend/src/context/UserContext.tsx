@@ -15,19 +15,20 @@ type UserContextType = {
 
 const UserContext = createContext<UserContextType>({
   userDetails: null,
-  setUserDetails: () => {},
+  setUserDetails: () => { },
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userDetails, setUserDetails] = useState<UserDetailsType | null>(null);
 
   useEffect(() => {
-    const cookieData = Cookies.get("details");
-    if (cookieData) {
+    const userData = localStorage.getItem("details");
+    if (userData) {
       try {
-        setUserDetails(cookieData);
+        const parsed = JSON.parse(userData);
+        setUserDetails(parsed); // this stores the full parsed object
       } catch (error) {
-        console.error("Error parsing user details from cookies:", error);
+        console.error("Error parsing user details from localStorage:", error);
       }
     }
   }, []);
