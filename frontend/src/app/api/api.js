@@ -44,16 +44,3 @@ export const signInUser = async (data) => {
   }
 }
 
-export const addProject = async (data, token) => {
-  try {
-    const response = await API.post("/student/addproject", data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("❌ Error while adding the project", error);
-    throw error;
-  }
-}

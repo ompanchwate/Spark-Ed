@@ -57,7 +57,7 @@ const { toast } = useToast();
             <NavLink to="/">Home</NavLink>
             <NavLink to="/dashboard/student/scholarships">Scholarships</NavLink>
             <NavLink to="/dashboard/student/addproject">Add Project</NavLink>
-            <NavLink to="/about">about</NavLink>
+            <NavLink to="/dashboard/student/myprojects">My Projects</NavLink>
           </div>
 
           <div className="hidden md:flex items-center space-x-4">

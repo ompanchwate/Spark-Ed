@@ -15,6 +15,8 @@ import { ThemeProvider } from "./components/ThemeProvider";
 import Scholarships from "./pages/Student/scholarships";
 import StudentLayout from "./layouts/StudentLayout";
 import AddProject from "./pages/Student/addProject";
+import MyProjects from "./pages/Student/myProjects";
+import ProjectDetails from "./pages/Student/projectDetails";
 
 const queryClient = new QueryClient();
 
@@ -49,7 +51,9 @@ const App = () => (
                 >
                   <Route index element={<StudentDashboard />} />
                   <Route path="scholarships" element={<Scholarships />} />
-                  <Route path="addproject" element={<AddProject/>} />
+                  <Route path="addproject" element={<AddProject />} />
+                  <Route path="myprojects" element={<MyProjects />} />
+                  <Route path="my-projects/:id" element={<ProjectDetails />} />
                 </Route>
 
 
