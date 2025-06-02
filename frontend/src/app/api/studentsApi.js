@@ -49,3 +49,17 @@ export const getProjectById = async (id, token) => {
         throw error;
     }
 }
+
+export const editProjectById = async (id, data, token) => {
+    try {
+        const response = await API.put(`/student/editproject/${id}`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("❌ Error while editing project by ID", error);
+        throw error;
+    }
+}

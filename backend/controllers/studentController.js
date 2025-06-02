@@ -57,6 +57,27 @@ export const getProjectById = async (req, res) => {
 
 }
 
+export const editProjectById = async (req, res) => {    
+    const { id } = req.params;
+    const { name, description, requested_amount  } = req.body;
+
+    try {
+        const [result] = await conn.query(
+            "UPDATE project SET name = ?, description = ?, requested_amount = ? WHERE project_id = ?",
+            [name, description, requested_amount , id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+
+        res.status(200).json({ message: "Project updated successfully" });
+    } catch (error) {
+        console.error("Error updating project:", error);
+        res.status(500).json({ message: "Server Error" });
+    }
+}
+
 
 
 

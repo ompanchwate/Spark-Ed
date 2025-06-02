@@ -1,24 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter
 } from "@/components/ui/dialog";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { editProjectById } from "@/app/api/studentsApi";
+import Cookies from "js-cookie";
 
 type FormValues = {
   name: string;
@@ -33,14 +35,14 @@ interface EditProjectDialogProps {
   onProjectUpdate: (updatedProject: any) => void;
 }
 
-export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
+export const EditProjectDialog = ({
   project,
   open,
   onOpenChange,
   onProjectUpdate
 }) => {
   const { toast } = useToast();
-  
+
   const form = useForm<FormValues>({
     defaultValues: {
       name: project?.name || "",
@@ -49,33 +51,39 @@ export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (project) {
       form.reset({
         name: project.name || "",
         description: project.description || "",
         requested_amount: project.requested_amount?.toString() || "",
       });
+      console.log(project)
     }
   }, [project, form]);
 
   const onSubmit = async (values: FormValues) => {
     try {
-      // Here you would typically make an API call to update the project
-      // For now, we'll just simulate the update
       const updatedProject = {
-        ...project,
+        project_id: project.project_id,
+        stud_id: project.stud_id,
         name: values.name,
         description: values.description,
         requested_amount: Number(values.requested_amount),
       };
-      
+      const token = Cookies.get("token");
+
+      const res = await editProjectById(project.project_id, updatedProject, token);
+      console.log(res);
+
       onProjectUpdate(updatedProject);
-      
+
       toast({
         title: "Project updated!",
         description: "Your project has been updated successfully.",
       });
+
+      onOpenChange(false);
     } catch (error) {
       toast({
         title: "Error",
@@ -93,7 +101,7 @@ export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
             Edit Project Details
           </DialogTitle>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -107,17 +115,17 @@ export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
                 <FormItem>
                   <FormLabel className="text-base">Project Name</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="Enter project name" 
-                      {...field} 
-                      className="border-blue-200 dark:border-blue-900 focus:border-purple-400 transition-all" 
+                    <Input
+                      placeholder="Enter project name"
+                      {...field}
+                      className="border-blue-200 dark:border-blue-900 focus:border-purple-400 transition-all"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="description"
@@ -129,17 +137,17 @@ export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
                 <FormItem>
                   <FormLabel className="text-base">Project Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Describe your project in detail" 
+                    <Textarea
+                      placeholder="Describe your project in detail"
                       className="min-h-40 border-blue-200 dark:border-blue-900 focus:border-purple-400 transition-all"
-                      {...field} 
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="requested_amount"
@@ -152,28 +160,28 @@ export const EditProjectDialog: React.FC<EditProjectDialogProps> = ({
                 <FormItem>
                   <FormLabel className="text-base">Requested Amount (₹)</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="text" 
-                      placeholder="0.00" 
+                    <Input
+                      type="text"
+                      placeholder="0.00"
                       {...field}
-                      className="border-blue-200 dark:border-blue-900 focus:border-purple-400 transition-all" 
+                      className="border-blue-200 dark:border-blue-900 focus:border-purple-400 transition-all"
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <DialogFooter className="gap-2">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
               >
                 Update Project
