@@ -1,5 +1,8 @@
-import Navbar from "@/components/Navbar"
+import Navbar from "@/components/student/StudentNavbar"
 import { Button } from "@/components/ui/button"
+import { useUser } from "@/context/UserContext";
+import { Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom"
 
 

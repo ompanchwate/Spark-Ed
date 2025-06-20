@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getProjectById } from "@/app/api/studentsApi";
 import Cookies from "js-cookie";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/student/StudentNavbar";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -102,10 +102,10 @@ const ProjectDetails = () => {
                     <div className="max-w-4xl mx-auto">
                         {/* Header */}
                         <div className="mb-8 flex items-center justify-between">
-                            <Link to="/projects">
+                            <Link to="/dashboard/student/myprojects">
                                 <Button variant="ghost" className="mb-4 text-blue-600 hover:text-blue-700">
                                     <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Back to Projects
+                                    Back to My Projects
                                 </Button>
                             </Link>
                             <Button 

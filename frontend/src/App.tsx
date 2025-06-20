@@ -1,12 +1,10 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import NotFound from "./pages/NotFound";
-import CompanyDashBoard from "./pages/Company/dashboard";
 import StudentDashboard from "./pages/Student/dashboard";
 import { UserProvider } from "./context/UserContext";
 import { AuthWrapper } from "./app/AuthWrapper";
@@ -17,6 +15,13 @@ import StudentLayout from "./layouts/StudentLayout";
 import AddProject from "./pages/Student/addProject";
 import MyProjects from "./pages/Student/myProjects";
 import ProjectDetails from "./pages/Student/projectDetails";
+import SignIn from "./components/Register/SignIn";
+import SignUp from "./components/Register/SignUp";
+import CompanyDashboard from "./pages/Company/CompanyDashboard";
+import CompanyLayout from "./layouts/CompanyLayout";
+import CompanyScholarships from "./pages/Company/CompanyScholarships";
+import ViewAllProjects from "./pages/Company/viewAllProjects";
+import Profile from "./components/profile";
 
 const queryClient = new QueryClient();
 
@@ -24,47 +29,56 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
+      <Sonner />
       <UserProvider>
         <BrowserRouter>
-          <AuthWrapper>
-            <ThemeProvider>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="*" element={<NotFound />} />
+          <ThemeProvider>
+            <Routes>
+              {/* Auth Routes */}
+              <Route path="/" element={<Navigate to="/signin" />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
 
-                <Route
-                  path="/dashboard/company"
-                  element={
+              {/* Protected Company Route */}
+              <Route
+                path="/dashboard/company"
+                element={
+                  <AuthWrapper>
                     <ProtectedRoute allowedUserType="company">
-                      <CompanyDashBoard />
+                      <CompanyLayout />
                     </ProtectedRoute>
-                  }
-                />
+                  </AuthWrapper>
+                }
+              >
+                <Route index element={<CompanyDashboard />} />
+                <Route path="scholarships" element={<CompanyScholarships />} />
+                <Route path="allprojects" element={<ViewAllProjects />} />
+              </Route>
 
-                <Route
-                  path="/dashboard/student"
-                  element={
+              {/* Protected Student Routes */}
+              <Route
+                path="/dashboard/student"
+                element={
+                  <AuthWrapper>
                     <ProtectedRoute allowedUserType="student">
                       <StudentLayout />
                     </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<StudentDashboard />} />
-                  <Route path="scholarships" element={<Scholarships />} />
-                  <Route path="addproject" element={<AddProject />} />
-                  <Route path="myprojects" element={<MyProjects />} />
-                  <Route path="my-projects/:id" element={<ProjectDetails />} />
-                </Route>
+                  </AuthWrapper>
+                }
+              >
+                <Route index element={<StudentDashboard />} />
+                <Route path="scholarships" element={<Scholarships />} />
+                <Route path="addproject" element={<AddProject />} />
+                <Route path="myprojects" element={<MyProjects />} />
+                <Route path="my-projects/:id" element={<ProjectDetails />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
 
-
-
-
-                <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
-
-
-              </Routes>
-            </ThemeProvider>
-          </AuthWrapper>
+              {/* Fallback */}
+              <Route path="/unauthorized" element={<div>Unauthorized Access</div>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </ThemeProvider>
         </BrowserRouter>
       </UserProvider>
     </TooltipProvider>

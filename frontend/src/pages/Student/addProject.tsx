@@ -11,7 +11,7 @@ import {
     FormLabel,
     FormMessage
 } from "@/components/ui/form";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/student/StudentNavbar";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Plus } from "lucide-react";

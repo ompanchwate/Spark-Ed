@@ -2,13 +2,20 @@ import { useState, useEffect } from "react";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { ThemeToggle } from "./ThemeToggle";
-import { Menu, Home, Search, Settings, LogOut } from "lucide-react";
+import { ThemeToggle } from "../ThemeToggle";
+import { Menu, Home, Search, Settings, LogOut, User, Moon } from "lucide-react";
 import { useUser } from "@/context/UserContext";
-import Cookies from "js-cookie";  
+import Cookies from "js-cookie";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
-export default function Navbar() {
+export default function StudentNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -21,20 +28,19 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-const { toast } = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
-  const { setUserDetails } = useUser(); // Access context
+  const { userDetails, setUserDetails } = useUser(); // User Context
 
   const handleLogout = () => {
     localStorage.removeItem("details");
     Cookies.remove("token");
-    // Clear context
     setUserDetails(null);
-               toast({
-                title: "Signed out successfully",
-                description: "See you soon.",
-            });
-    navigate("/");
+    toast({
+      title: "Signed out successfully",
+      description: "See you soon.",
+    });
+    navigate("/signin");
   };
 
 
@@ -44,35 +50,50 @@ const { toast } = useToast();
       <div className=" mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center">
+            <Link to="/dashboard/student" className="flex items-center">
               <div className="bg-white rounded-full p-1 mr-2">
                 <Home className="h-5 w-5 text-blue-600" />
               </div>
-              <span className="text-white font-bold text-xl tracking-wide">Spark-Ed</span>
+              <div>
+                <span className="text-white font-bold text-xl tracking-wide">Spark-Ed</span>
+                <span className="text-white/80 text-xs block leading-none">Student Portal</span>
+              </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-12">
-            <NavLink to="/">Home</NavLink>
+            <NavLink to="/dashboard/student">Home</NavLink>
             <NavLink to="/dashboard/student/scholarships">Scholarships</NavLink>
             <NavLink to="/dashboard/student/addproject">Add Project</NavLink>
             <NavLink to="/dashboard/student/myprojects">My Projects</NavLink>
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
-            <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4 mr-1" />
-              Log out
-            </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-white cursor-pointer hover:bg-white/20 flex items-center space-x-1">
+                <User className="h-4 w-4" />
+                <span>{userDetails?.userDetails?.name}</span>
+              </Button>
+            </DropdownMenuTrigger>
 
-          </div>
+            <DropdownMenuContent className="w-48 bg-white  dark:bg-gray-800 text-black dark:text-white">
+              <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("profile")}>
+                <User className="h-4 w-4 mr-2" /> View Profile
+              </DropdownMenuItem>
+
+              <DropdownMenuItem asChild>
+                <ThemeToggle />
+              </DropdownMenuItem>
+
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem onClick={handleLogout} className="text-red-500">
+                <LogOut className="h-4 w-4 mr-2" /> Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Mobile Navigation */}
           <div className="flex md:hidden items-center space-x-4">
@@ -84,7 +105,7 @@ const { toast } = useToast();
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="bg-gradient-to-b from-blue-600 to-purple-600 text-white border-none">
-                <div className="flex flex-col space-y-6 mt-10">
+                <div className="flex flex-col space-y-6 mt-10 ">
                   <MobileNavLink to="/">Home</MobileNavLink>
                   <MobileNavLink to="/about">About</MobileNavLink>
                   <MobileNavLink to="/courses">Courses</MobileNavLink>

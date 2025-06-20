@@ -1,11 +1,10 @@
-// src/layouts/StudentLayout.jsx
 import { Outlet } from 'react-router-dom';
-import Navbar from '../components/Navbar';
+import StudentNavbar from '../components/student/StudentNavbar';
 
 const StudentLayout = () => {
   return (
     <div className="">
-      <Navbar />
+      <StudentNavbar />
       <main>
         <Outlet />
       </main>

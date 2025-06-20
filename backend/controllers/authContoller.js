@@ -74,22 +74,24 @@ export const signIn = async (req, res) => {
         const { email, password, type } = req.body;
 
         if (type === "student") {
-            const [user] = await conn.query("SELECT * FROM student WHERE email = ? AND password = ?", [email, password]);
-            if (user.length === 0) {
+            const [rows] = await conn.query("SELECT * FROM student WHERE email = ? AND password = ?", [email, password]);
+            if (rows.length === 0) {
                 return res.status(401).json({ message: "Invalid credentials" });
             }
+            const user = rows[0];  // ✅ this is the actual user object
+
             const token = jwt.sign(
                 {
                     email: user.email,
                     name: user.name,
-                    userType: type, // "student" or "company"
-                    userId: user.id,         // optional
+                    userType: type,
+                    userId: user.stud_id,  // ✅ correctly added now
                 },
                 JWT_SECRET,
                 { expiresIn: "1h" }
             );
 
-            return res.status(200).json({ status: 200, token: token, message: "Student signed in successfully", userDetails: user[0], userType: "student" });
+            return res.status(200).json({ status: 200, token: token, message: "Student signed in successfully", userDetails: user, userType: "student" });
         }
 
         // COMPANY SIGNIN
@@ -97,7 +99,17 @@ export const signIn = async (req, res) => {
         if (user.length === 0) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
-        const token = jwt.sign({ id: user.company_id, email: user.email }, JWT_SECRET, { expiresIn: "1h" });
+        user = user[0];
+        const token = jwt.sign(
+            {
+                email: user.email,
+                name: user.name,
+                userType: type,
+                userId: user.company_id,
+            },
+            JWT_SECRET,
+            { expiresIn: "1h" }
+        );
         res.status(200).json({ status: 200, token: token, message: "Company signed in successfully", userDetails: user[0], userType: "company" });
 
     } catch (error) {

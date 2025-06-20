@@ -1,4 +1,24 @@
 import conn from "../db.js";
+export const editProfile = async (req, res) => {
+  try {
+    const { field, value } = req.body;
+    const userId = req.user?.userId;
+
+    if (!userId || !field) {
+      return res.status(400).json({ message: "Missing user ID or field name" });
+    }
+   
+    const query = `UPDATE student SET ${field} = ? WHERE stud_id = ?`; // ✅ dynamic field
+    const [result] = await conn.query(query, [value, userId]);
+
+    return res.status(200).json({ message: `${field} updated successfully` });
+
+  } catch (error) {
+    console.error("Edit profile error:", error);
+    return res.status(500).json({ message: "Server error while updating profile" });
+  }
+};
+
 
 
 export const addProject = async (req, res) => {
@@ -10,7 +30,7 @@ export const addProject = async (req, res) => {
             return res.status(404).json({ message: "Student not found" });
         }
         const [result] = await conn.query(
-            "INSERT INTO project (name, description, stud_id, requested_amount ) VALUES (?, ?, ?, ?)",
+            "INSERT INTO projects (name, description, stud_id, requested_amount ) VALUES (?, ?, ?, ?)",
             [name, description, stud_id, requestedAmount]
         );
         res.status(201).json({ id: result.insertId });
@@ -29,7 +49,7 @@ export const myProjects = async (req, res) => {
             return res.status(404).json({ message: "Student not found" });
         }
         const [result] = await conn.query(
-            "SELECT * FROM project WHERE stud_id = ?",
+            "SELECT * FROM projects WHERE stud_id = ?",
             [stud_id]
         );
         res.status(201).json(result);
@@ -43,7 +63,7 @@ export const getProjectById = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const [result] = await conn.query("SELECT * FROM project WHERE project_id = ?", [id]);
+        const [result] = await conn.query("SELECT * FROM projects WHERE project_id = ?", [id]);
 
         if (result.length === 0) {
             return res.status(404).json({ message: "Project not found" });
@@ -57,14 +77,14 @@ export const getProjectById = async (req, res) => {
 
 }
 
-export const editProjectById = async (req, res) => {    
+export const editProjectById = async (req, res) => {
     const { id } = req.params;
-    const { name, description, requested_amount  } = req.body;
+    const { name, description, requested_amount } = req.body;
 
     try {
         const [result] = await conn.query(
-            "UPDATE project SET name = ?, description = ?, requested_amount = ? WHERE project_id = ?",
-            [name, description, requested_amount , id]
+            "UPDATE projects SET name = ?, description = ?, requested_amount = ? WHERE project_id = ?",
+            [name, description, requested_amount, id]
         );
 
         if (result.affectedRows === 0) {

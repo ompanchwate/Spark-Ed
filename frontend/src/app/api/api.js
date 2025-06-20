@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Base URL of your backend server
-const API = axios.create({
+export const API = axios.create({
   baseURL: "http://localhost:3001/api", // make sure port matches your Express server
   headers: {
     "Content-Type": "application/json",

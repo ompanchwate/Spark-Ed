@@ -53,3 +53,14 @@ export const signInCompany = async (req, res) => {
         res.status(500).json({ message: "Server Error" });
     }
 }
+
+
+export const allProjects = async (req, res) => {
+    try {
+        const [projects] = await conn.query("SELECT * FROM projects");
+        res.json(projects);
+    } catch (error) {
+        console.error("Error fetching projects:", error);
+        res.status(500).json({ message: "Server Error" });
+    }
+}

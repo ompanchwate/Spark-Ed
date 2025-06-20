@@ -1,11 +1,6 @@
 import axios from "axios";
+import { API } from "./api";
 
-const API = axios.create({
-    baseURL: "http://localhost:3001/api", // make sure port matches your Express server
-    headers: {
-        "Content-Type": "application/json",
-    },
-});
 
 export const addProject = async (data, token) => {
     try {
@@ -60,6 +55,20 @@ export const editProjectById = async (id, data, token) => {
         return response.data;
     } catch (error) {
         console.error("❌ Error while editing project by ID", error);
+        throw error;
+    }
+}
+
+export const editStudProfile = async(data, token) => {
+    try {
+        const response = await API.put("/student/editprofile", data, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("❌ Error while editing student profile", error);
         throw error;
     }
 }
