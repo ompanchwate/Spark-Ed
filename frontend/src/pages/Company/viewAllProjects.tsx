@@ -8,13 +8,12 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Calendar, Briefcase, User, IndianRupee } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/context/UserContext";
 import { NavLink } from "react-router-dom";
-import {allProjects} from "@/api/CompanyApi"
+import {allProjects} from "@/api/companyApi"
 
 const ViewAllProjects = () => {
     const { toast } = useToast();
