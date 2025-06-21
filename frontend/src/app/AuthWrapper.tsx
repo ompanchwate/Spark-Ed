@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
-import { validateToken } from "@/app/api/api";
+import { validateToken } from "@/api/api";
 
 export const AuthWrapper = ({ children }) => {
   const navigate = useNavigate();
