@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { DollarSign, Calendar, Briefcase, User, IndianRupee, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { myProjects } from "@/app/api/studentsApi";
+import { myProjects } from "@/api/studentsApi"
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/context/UserContext";
 import { NavLink } from "react-router-dom";

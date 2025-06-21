@@ -15,7 +15,7 @@ import Navbar from "@/components/student/StudentNavbar";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Plus } from "lucide-react";
-import { addProject } from "@/app/api/studentsApi";
+import { addProject } from "@/api/studentsApi";
 import Cookies from "js-cookie";
 import { useUser } from '@/context/UserContext';
 

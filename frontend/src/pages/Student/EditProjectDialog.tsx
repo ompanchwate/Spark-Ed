@@ -19,7 +19,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { editProjectById } from "@/app/api/studentsApi";
+import { editProjectById } from "@/api/studentsApi";
 import Cookies from "js-cookie";
 
 type FormValues = {

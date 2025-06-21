@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { User, Mail, GraduationCap, Award, Edit, Save, X, Plus, Trash2 } from 'lucide-react';
-import { editStudProfile } from "@/app/api/studentsApi";
+import { editStudProfile } from "@/api/studentsApi";
 import Cookies from 'js-cookie';
 import { useToast } from '@/hooks/use-toast';
 

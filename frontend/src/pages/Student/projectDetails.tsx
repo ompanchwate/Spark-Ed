@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getProjectById } from "@/app/api/studentsApi";
+import { getProjectById } from "@/api/studentsApi";
 import Cookies from "js-cookie";
 import Navbar from "@/components/student/StudentNavbar";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";

@@ -14,7 +14,7 @@ import Cookies from "js-cookie";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/context/UserContext";
 import { NavLink } from "react-router-dom";
-import {allProjects} from "@/app/api/CompanyApi"
+import {allProjects} from "@/api/CompanyApi"
 
 const ViewAllProjects = () => {
     const { toast } = useToast();

@@ -18,7 +18,7 @@ import {
   EyeOff,
   Eye,
 } from "lucide-react";
-import { signUpUser } from "@/app/api/api"; // Adjust the import path as necessary
+import { signUpUser } from "@/api/api"; // Adjust the import path as necessary
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "../ThemeToggle";
 
