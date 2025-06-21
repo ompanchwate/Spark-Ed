@@ -66,7 +66,7 @@ export const editStudProfile = async(data, token) => {
                 Authorization: `Bearer ${token}`,
             }
         });
-        return response.data;
+        return response;
     } catch (error) {
         console.error("❌ Error while editing student profile", error);
         throw error;

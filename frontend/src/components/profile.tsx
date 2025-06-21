@@ -100,32 +100,99 @@ const Profile = () => {
   };
 
 
-  const handleAddSkill = () => {
-    if (newSkill.trim() && userDetails?.userDetails) {
-      const updatedSkills = [...parsedSkills, newSkill.trim()];
-      setUserDetails({
-        ...userDetails,
-        userDetails: {
-          ...userDetails.userDetails,
-          skills: JSON.stringify(updatedSkills)
-        }
+  const handleAddSkill = async () => {
+    const trimmedSkill = newSkill.trim();
+
+    if (!trimmedSkill || !userDetails?.userDetails) return;
+
+    const updatedSkills = [...parsedSkills, trimmedSkill];
+
+    try {
+      const response = await editStudProfile(
+        { field: "skills", value: JSON.stringify(updatedSkills) },
+        token
+      );
+
+      if (response.status === 200) {
+        toast({ title: "Skill added successfully!" });
+
+        setUserDetails((prev) => {
+          const updated = {
+            ...prev!,
+            userDetails: {
+              ...prev!.userDetails,
+              skills: JSON.stringify(updatedSkills),
+            },
+          };
+          localStorage.setItem("details", JSON.stringify(updated));
+          return updated;
+        });
+
+
+        setNewSkill("");
+      } else {
+        toast({
+          title: "Failed to add skill",
+          description: response.data?.message || "Try again later.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Skill update error:", error);
+      toast({
+        title: "Error adding skill",
+        description: "Something went wrong.",
+        variant: "destructive",
       });
-      setNewSkill('');
     }
   };
 
-  const handleRemoveSkill = (indexToRemove: number) => {
-    if (userDetails?.userDetails) {
-      const updatedSkills = parsedSkills.filter((_, index) => index !== indexToRemove);
-      setUserDetails({
-        ...userDetails,
-        userDetails: {
-          ...userDetails.userDetails,
-          skills: JSON.stringify(updatedSkills)
-        }
+
+  const handleRemoveSkill = async (indexToRemove: number) => {
+    if (!userDetails?.userDetails) return;
+
+    const updatedSkills = parsedSkills.filter((_, index) => index !== indexToRemove);
+
+    try {
+      const response = await editStudProfile(
+        { field: "skills", value: JSON.stringify(updatedSkills) },
+        token
+      );
+
+      if (response.status === 200) {
+        toast({
+          title: "Skill removed successfully!",
+        });
+
+        setUserDetails((prev) => {
+          const updated = {
+            ...prev,
+            userDetails: {
+              ...prev!.userDetails,
+              skills: JSON.stringify(updatedSkills),
+            },
+          };
+          localStorage.setItem("details", JSON.stringify(updated)); // <== ✅ Add this
+          return updated;
+        });
+
+      } else {
+        toast({
+          title: "Failed to remove skill",
+          description: response.data?.message || "Try again later.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Remove skill error:", error);
+      toast({
+        title: "Something went wrong",
+        description: "Unable to remove skill.",
+        variant: "destructive",
       });
     }
   };
+
 
   const handleAddEducation = () => {
     const newEducation = {
@@ -144,43 +211,111 @@ const Profile = () => {
     setEditedEducation(updated);
   };
 
-  const handleSaveEducation = () => {
-    if (userDetails?.userDetails) {
-      const combinedEducation = [...educationArray, ...editedEducation.filter(edu =>
-        edu.degree || edu.college || edu.startYear || edu.endYear || edu.location
-      )];
+  const handleSaveEducation = async () => {
+    if (!userDetails?.userDetails) return;
 
-      // Sort the combined education by end year in descending order
-      combinedEducation.sort((a, b) => {
-        const endYearA = parseInt(a.endYear) || 0;
-        const endYearB = parseInt(b.endYear) || 0;
-        return endYearB - endYearA;
-      });
+    const combinedEducation = [
+      ...educationArray,
+      ...editedEducation.filter(
+        (edu) =>
+          edu.degree?.trim() ||
+          edu.college?.trim() ||
+          edu.startYear?.trim() ||
+          edu.endYear?.trim() ||
+          edu.location?.trim()
+      ),
+    ];
 
-      setUserDetails({
-        ...userDetails,
-        userDetails: {
-          ...userDetails.userDetails,
-          education: JSON.stringify(combinedEducation)
-        }
+    combinedEducation.sort((a, b) => {
+      const endYearA = parseInt(a.endYear) || 0;
+      const endYearB = parseInt(b.endYear) || 0;
+      return endYearB - endYearA;
+    });
+
+    try {
+      const response = await editStudProfile(
+        { field: "education", value: JSON.stringify(combinedEducation) },
+        token
+      );
+
+      if (response.status === 200) {
+        toast({ title: "Education updated successfully!" });
+
+        const updated = {
+          ...userDetails,
+          userDetails: {
+            ...userDetails.userDetails,
+            education: JSON.stringify(combinedEducation),
+          },
+        };
+
+        setUserDetails(updated);
+        localStorage.setItem("details", JSON.stringify(updated)); // ✅ save to localStorage
+
+        setEditedEducation([]);
+        setIsEditingEducation(false);
+      } else {
+        toast({
+          title: "Failed to update education",
+          description: response.data?.message || "Try again later.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Education update error:", error);
+      toast({
+        title: "Error updating education",
+        description: "Something went wrong.",
+        variant: "destructive",
       });
-      setEditedEducation([]);
-      setIsEditingEducation(false);
     }
   };
 
-  const handleRemoveEducation = (indexToRemove: number) => {
-    if (userDetails?.userDetails) {
-      const updatedEducation = educationArray.filter((_, index) => index !== indexToRemove);
-      setUserDetails({
-        ...userDetails,
-        userDetails: {
-          ...userDetails.userDetails,
-          education: JSON.stringify(updatedEducation)
-        }
+
+  const handleRemoveEducation = async (indexToRemove: number) => {
+    if (!userDetails?.userDetails) return;
+
+    const confirmed = window.confirm("Are you sure you want to remove this education entry?");
+    if (!confirmed) return;
+
+    const updatedEducation = educationArray.filter((_, index) => index !== indexToRemove);
+
+    try {
+      const response = await editStudProfile(
+        { field: "education", value: JSON.stringify(updatedEducation) },
+        token
+      );
+
+      if (response.status === 200) {
+        toast({ title: "Education removed successfully!" });
+
+        const updated = {
+          ...userDetails,
+          userDetails: {
+            ...userDetails.userDetails,
+            education: JSON.stringify(updatedEducation),
+          },
+        };
+
+        setUserDetails(updated);
+        localStorage.setItem("details", JSON.stringify(updated));
+      } else {
+        toast({
+          title: "Failed to remove education",
+          description: response.data?.message || "Try again later.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Education remove error:", error);
+      toast({
+        title: "Error removing education",
+        description: "Something went wrong.",
+        variant: "destructive",
       });
     }
   };
+
 
   return (
     <div className='dark:bg-slate-900'>

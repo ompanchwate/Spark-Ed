@@ -1,0 +1,72 @@
+-- Student table
+CREATE TABLE Student (
+    stud_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255),
+    gender VARCHAR(255),
+    phone VARCHAR(255)
+    password VARCHAR(255),
+    skills JSON,
+    education JSON
+);
+
+-- Company table
+CREATE TABLE Company (
+    company_id INT AUTO_INCREMENT PRIMARY KEY,
+    company_name VARCHAR(255),
+    email VARCHAR(255),
+    phone VARCHAR(255),
+    location VARCHAR(255),
+    password VARCHAR(255),
+    description VARCHAR(255)
+);
+
+-- Scholarship table
+CREATE TABLE Scholarship (
+    scholarship_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    description VARCHAR(255),
+    amount INT,
+    eligibility_criteria JSON,
+    company_id INT,
+    status VARCHAR(100),
+    FOREIGN KEY (company_id) REFERENCES Company(company_id)
+);
+
+-- Project table
+CREATE TABLE Projects (
+    project_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    description TEXT,
+    stud_id INT,
+    status VARCHAR(100),
+    requested_amount INT,
+    approved_amount INT,
+    company_id INT,
+    FOREIGN KEY (stud_id) REFERENCES Student(stud_id),
+    FOREIGN KEY (company_id) REFERENCES Company(company_id)
+);
+
+-- Application table
+CREATE TABLE Application (
+    application_id INT AUTO_INCREMENT PRIMARY KEY,
+    stud_id INT,
+    scholarship_id INT,
+    status VARCHAR(100),
+    test_score INT,
+    resume TEXT,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (stud_id) REFERENCES Student(stud_id),
+    FOREIGN KEY (scholarship_id) REFERENCES Scholarship(scholarship_id)
+);
+
+-- Notification table
+CREATE TABLE Notification (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_type VARCHAR(50) NOT NULL CHECK (user_type IN ('student', 'company')),
+    user_id INT NOT NULL,
+    message TEXT,
+    notification_type VARCHAR(100),
+    status VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

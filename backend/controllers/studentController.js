@@ -6,7 +6,7 @@ export const editProfile = async (req, res) => {
 
     if (!userId || !field) {
       return res.status(400).json({ message: "Missing user ID or field name" });
-    }
+    } 
    
     const query = `UPDATE student SET ${field} = ? WHERE stud_id = ?`; // ✅ dynamic field
     const [result] = await conn.query(query, [value, userId]);
@@ -25,7 +25,7 @@ export const addProject = async (req, res) => {
     const { name, description, requestedAmount, stud_id } = req.body;
 
     try {
-        const [stud] = await conn.query("SELECT * from Student where stud_id = ?", [stud_id])
+        const [stud] = await conn.query("SELECT * from student where stud_id = ?", [stud_id])
         if (stud.length === 0) {
             return res.status(404).json({ message: "Student not found" });
         }
@@ -44,7 +44,7 @@ export const myProjects = async (req, res) => {
     const { stud_id } = req.body;
 
     try {
-        const [stud] = await conn.query("SELECT * from Student where stud_id = ?", [stud_id])
+        const [stud] = await conn.query("SELECT * from student where stud_id = ?", [stud_id])
         if (stud.length === 0) {
             return res.status(404).json({ message: "Student not found" });
         }
@@ -97,23 +97,6 @@ export const editProjectById = async (req, res) => {
         res.status(500).json({ message: "Server Error" });
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
