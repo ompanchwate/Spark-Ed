@@ -36,7 +36,7 @@ const MyProjects = () => {
                 setisLoading(true)
                 const response = await myProjects({ stud_id }, token);
 
-                if (!response || response.error) {
+                if (!response) {
                     setisLoading(false)
                     throw new Error("Failed to fetch projects");
                 }

@@ -13,6 +13,13 @@ import {
 import Cookies from "js-cookie";
 import { useUser } from "@/context/UserContext";
 import { ThemeToggle } from "../ThemeToggle";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 export default function CompanyNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -38,8 +45,8 @@ export default function CompanyNavbar() {
 
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled
-        ? "bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg py-2"
-        : "bg-gradient-to-r from-blue-500 to-purple-500 py-4"
+      ? "bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg py-2"
+      : "bg-gradient-to-r from-blue-500 to-purple-500 py-4"
       }`}>
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
@@ -58,23 +65,34 @@ export default function CompanyNavbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-8 ">
             <NavLink to="">Dashboard</NavLink>
+            <NavLink to="">Add Scholarship</NavLink>
             <NavLink to="">Scholarships</NavLink>
-            <NavLink to="allprojects">Projects</NavLink>
-            <NavLink to="profile">Profile</NavLink>
+            <NavLink to="allprojects">All Projects</NavLink>
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white  hover:bg-white/20"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-4 w-4 mr-1" />
-              Logout
-            </Button>
-
             <ThemeToggle />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-white cursor-pointer hover:bg-white/20 flex items-center space-x-2">
+                  <User className="h-4 w-4" />
+                  <span className="truncate max-w-32">{userDetails?.userDetails?.company_name || 'Student'}</span>
+                </Button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent className="w-48 bg-white dark:bg-gray-800 text-black dark:text-white">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("profile")}>
+                  <User className="h-4 w-4 mr-2" /> View Profile
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={handleLogout} className="text-red-500 cursor-pointer">
+                  <LogOut className="h-4 w-4 mr-2" /> Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Mobile Navigation */}

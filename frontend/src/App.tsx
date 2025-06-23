@@ -21,7 +21,9 @@ import CompanyDashboard from "./pages/Company/CompanyDashboard";
 import CompanyLayout from "./layouts/CompanyLayout";
 import CompanyScholarships from "./pages/Company/CompanyScholarships";
 import ViewAllProjects from "./pages/Company/viewAllProjects";
-import Profile from "./components/profile";
+import StudentProfile from "./components/student/studentprofile";
+import CompanyProfile from "./components/company/companyprofile";
+import CreateScholarship from "./pages/Company/createScholarship";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +54,8 @@ const App = () => (
               >
                 <Route index element={<CompanyDashboard />} />
                 <Route path="scholarships" element={<CompanyScholarships />} />
+                <Route path="addscholarship" element={<CreateScholarship />} />
+                <Route path="profile" element={<CompanyProfile />} />
                 <Route path="allprojects" element={<ViewAllProjects />} />
               </Route>
 
@@ -71,7 +75,7 @@ const App = () => (
                 <Route path="addproject" element={<AddProject />} />
                 <Route path="myprojects" element={<MyProjects />} />
                 <Route path="my-projects/:id" element={<ProjectDetails />} />
-                <Route path="profile" element={<Profile />} />
+                <Route path="profile" element={<StudentProfile />} />
               </Route>
 
               {/* Fallback */}

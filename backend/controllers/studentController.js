@@ -44,7 +44,7 @@ export const myProjects = async (req, res) => {
     const { stud_id } = req.body;
 
     try {
-        const [stud] = await conn.query("SELECT * from student where stud_id = ?", [stud_id])
+        const [stud] = await conn.query("SELECT * FROM student WHERE stud_id = ? ORDER BY stud_id DESC", [stud_id])
         if (stud.length === 0) {
             return res.status(404).json({ message: "Student not found" });
         }

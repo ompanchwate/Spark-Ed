@@ -42,32 +42,52 @@ export const validateToken = async (req, res) => {
 
 export const signUp = async (req, res) => {
     try {
-        const { name, email, password, type } = req.body;
+        const { name, email, password, type, phone, gender } = req.body;
 
         if (type === "student") {
-            const [existingStudent] = await conn.query("SELECT * FROM student WHERE email = ?", [email]);
+            const [existingStudent] = await conn.query(
+                "SELECT * FROM student WHERE email = ?",
+                [email]
+            );
+
             if (existingStudent.length > 0) {
                 return res.status(400).json({ message: "Student already exists" });
             }
 
-            await conn.query("INSERT INTO student (name, email, password) VALUES (?, ?, ?)", [name, email, password]);
+            await conn.query(
+                "INSERT INTO student (name, email, password, phone, gender) VALUES (?, ?, ?, ?, ?)",
+                [name, email, password, phone, gender]
+            );
 
-            res.status(201).json({ message: "Student signed up successfully" });
+            return res.status(201).json({ message: "Student signed up successfully" });
         }
 
-        // COMPANY SIGNUP
-        const [existingCompany] = await conn.query("SELECT * FROM company WHERE email = ?", [email]);
-        if (existingCompany.length > 0) {
-            return res.status(400).json({ message: "Company already exists" });
+        if (type === "company") {
+            const [existingCompany] = await conn.query(
+                "SELECT * FROM company WHERE email = ?",
+                [email]
+            );
+
+            if (existingCompany.length > 0) {
+                return res.status(400).json({ message: "Company already exists" });
+            }
+
+            await conn.query(
+                "INSERT INTO company (company_name, email, password, phone) VALUES (?, ?, ?, ?)",
+                [name, email, password, phone]
+            );
+
+            return res.status(201).json({ message: "Company signed up successfully" });
         }
-        await conn.query("INSERT INTO company (company_name, email, password) VALUES (?, ?, ?)", [name, email, password]);
-        res.status(201).json({ message: "Company signed up successfully" });
+
+        return res.status(400).json({ message: "Invalid user type" });
 
     } catch (error) {
-        console.error("Error signing up company:", error);
-        res.status(500).json({ message: "Server Error" });
+        console.error("Error signing up:", error);
+        return res.status(500).json({ message: "Server Error" });
     }
-}
+};
+
 
 export const signIn = async (req, res) => {
     try {
@@ -95,11 +115,11 @@ export const signIn = async (req, res) => {
         }
 
         // COMPANY SIGNIN
-        const [user] = await conn.query("SELECT * FROM company WHERE email = ? AND password = ?", [email, password]);
-        if (user.length === 0) {
+        const [rows] = await conn.query("SELECT * FROM company WHERE email = ? AND password = ?", [email, password]);
+        if (rows.length === 0) {
             return res.status(401).json({ message: "Invalid credentials" });
         }
-        user = user[0];
+        const user = rows[0];
         const token = jwt.sign(
             {
                 email: user.email,
@@ -110,7 +130,7 @@ export const signIn = async (req, res) => {
             JWT_SECRET,
             { expiresIn: "1h" }
         );
-        res.status(200).json({ status: 200, token: token, message: "Company signed in successfully", userDetails: user[0], userType: "company" });
+        res.status(200).json({ status: 200, token: token, message: "Company signed in successfully", userDetails: user, userType: "company" });
 
     } catch (error) {
         console.error("Error signing in company:", error);

@@ -203,7 +203,7 @@ const SignIn = () => {
                 </div>
 
                 <Button type="submit" className="w-full bg-blue-600 dark:text-white hover:bg-blue-700">
-                  {isLoading ? <><Loader /> Signing In </> :
+                  {isLoading ? <><Loader className="animate-spin"/> Signing In </> :
                     <> Sign In <ArrowRight className="ml-2 h-4 w-4" /> </>}
                 </Button>
               </form>
@@ -248,12 +248,12 @@ const SignIn = () => {
 
               <p className="text-center text-sm text-gray-600 mt-2 dark:text-gray-400">
                 Don't have an account?{" "}
-                <a
-                  href="/signup"
+                <button
+                  onClick={() => navigate('/signup')}
                   className="text-blue-600 hover:text-blue-700 font-semibold hover:underline dark:text-blue-400"
                 >
                   Sign up
-                </a>
+                </button>
               </p>
             </CardFooter>
           </Card>

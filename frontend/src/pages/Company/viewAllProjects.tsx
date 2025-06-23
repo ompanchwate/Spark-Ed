@@ -34,7 +34,7 @@ const ViewAllProjects = () => {
                 const token = Cookies.get("token");
                 const response = await allProjects(token);
 
-                if (!response || response.error) {
+                if (!response) {
                     throw new Error("Failed to fetch projects");
                 }
 
@@ -55,7 +55,7 @@ const ViewAllProjects = () => {
     return (
         <div className="container mx-auto px-4 py-24 max-w-7xl">
             <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent pb-6">
-                My Projects
+                All Projects
             </h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

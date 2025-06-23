@@ -18,6 +18,7 @@ import { Plus } from "lucide-react";
 import { addProject } from "@/api/studentsApi";
 import Cookies from "js-cookie";
 import { useUser } from '@/context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 type FormValues = {
     name: string;
@@ -28,6 +29,7 @@ type FormValues = {
 const AddProject = () => {
     const { toast } = useToast();
     const { userDetails } = useUser();
+    const navigate = useNavigate();
 
     const form = useForm<FormValues>({
         defaultValues: {
@@ -47,6 +49,7 @@ const AddProject = () => {
                 description: "Your project has been submitted successfully.",
             });
             form.reset();
+            navigate('/dashboard/student/myprojects')
         }
         else {
             toast({

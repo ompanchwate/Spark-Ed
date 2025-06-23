@@ -21,6 +21,7 @@ import {
 import { signUpUser } from "@/api/api"; // Adjust the import path as necessary
 import { useNavigate } from "react-router-dom";
 import { ThemeToggle } from "../ThemeToggle";
+import { useToast } from "@/hooks/use-toast";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -28,9 +29,13 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    gender: "",
+    phone: "",
     email: "",
     password: ""
   });
+
+  const {toast} = useToast();
 
   useEffect(() => {
     const users = localStorage.getItem("details");
@@ -57,14 +62,18 @@ const SignUp = () => {
       };
       const res = await signUpUser(payload)
 
-      // console.log(res)
-      console.log(payload)
+      toast({
+        title: "Sign Up successful",
+        description: `Sign in to use Spark-Ed.`,
+      });
 
-      // }
-      alert("Signup successful");
+      navigate('/signin')
     } catch (error) {
       console.error(error);
-      alert("Signup failed");
+          toast({
+      title: "Sign Up Failed",
+      description: `Error creating account: ${error.message}`,
+    });
     }
   };
 
@@ -128,6 +137,41 @@ const SignUp = () => {
                       required
                     />
                   </div>
+                </div>
+
+                {/* Gender - Only show for students */}
+                {userType === "student" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="gender" className="dark:text-gray-300">Gender</Label>
+                    <select
+                      id="gender"
+                      name="gender"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      value={formData.gender}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Phone */}
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="dark:text-gray-300">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    placeholder="+1 (555) 123-4567"
+                    className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
 
                 {/* Email */}
@@ -232,12 +276,12 @@ const SignUp = () => {
 
               <p className="text-center text-sm text-gray-600 mt-2 dark:text-gray-400">
                 Already have an account?{" "}
-                <a
-                  href="/signin"
+                <button
+                  onClick={() => navigate('/signin')}
                   className="text-blue-600 hover:text-blue-700 font-semibold hover:underline dark:text-blue-400"
                 >
                   Sign in
-                </a>
+                </button>
               </p>
             </CardFooter>
           </Card>

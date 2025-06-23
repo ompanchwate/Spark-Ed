@@ -49,7 +49,7 @@ export default function StudentNavbar() {
         ? "bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg py-2"
         : "bg-gradient-to-r from-blue-500 to-purple-500 py-4"
       }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
           {/* Logo Section */}
           <div className="flex items-center">
