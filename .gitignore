@@ -1,6 +1,10 @@
 # Ignore env files
-frontend/.env
-backend/.env
+server/.env
+client/.env
 
-frontend/.env*
-backend/.env*
+client/.env*
+server/.env*
+
+client/node_modules
+server/node_modules
+
