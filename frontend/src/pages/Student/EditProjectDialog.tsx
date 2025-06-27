@@ -58,7 +58,6 @@ export const EditProjectDialog = ({
         description: project.description || "",
         requested_amount: project.requested_amount?.toString() || "",
       });
-      console.log(project)
     }
   }, [project, form]);
 
@@ -74,7 +73,6 @@ export const EditProjectDialog = ({
       const token = Cookies.get("token");
 
       const res = await editProjectById(project.project_id, updatedProject, token);
-      console.log(res);
 
       onProjectUpdate(updatedProject);
 

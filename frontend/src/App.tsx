@@ -24,6 +24,9 @@ import ViewAllProjects from "./pages/Company/viewAllProjects";
 import StudentProfile from "./components/student/studentprofile";
 import CompanyProfile from "./components/company/companyprofile";
 import CreateScholarship from "./pages/Company/createScholarship";
+import CompanyProjectDetails from "./pages/Company/CompanyprojectDetails";
+import FundingPending from "./pages/Company/companyfundingPending";
+import FundRequests from "./pages/Student/projectPending";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +60,8 @@ const App = () => (
                 <Route path="addscholarship" element={<CreateScholarship />} />
                 <Route path="profile" element={<CompanyProfile />} />
                 <Route path="allprojects" element={<ViewAllProjects />} />
+                <Route path="project-detail/:id" element={<CompanyProjectDetails />} />
+                <Route path="pending-projects" element={<FundingPending />} />
               </Route>
 
               {/* Protected Student Routes */}
@@ -76,6 +81,7 @@ const App = () => (
                 <Route path="myprojects" element={<MyProjects />} />
                 <Route path="my-projects/:id" element={<ProjectDetails />} />
                 <Route path="profile" element={<StudentProfile />} />
+                <Route path="fundingrequests" element={<FundRequests />} />
               </Route>
 
               {/* Fallback */}

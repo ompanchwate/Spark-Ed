@@ -72,3 +72,17 @@ export const editStudProfile = async(data, token) => {
         throw error;
     }
 }
+
+export const getFundingRequests = async(token) => {
+    try {
+        const response = await API.get("/student/fundingrequests", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("❌ Error while fetching funding requests", error);
+        throw error;
+    }
+}

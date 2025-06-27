@@ -18,8 +18,6 @@ export const validateToken = async (req, res) => {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
 
-        console.log("Decoded token:", decoded);
-
         // Access the userType
         const userType = decoded.userType;
 

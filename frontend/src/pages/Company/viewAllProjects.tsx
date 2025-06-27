@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/context/UserContext";
 import { NavLink } from "react-router-dom";
 import {allProjects} from "@/api/companyApi"
+import ProjectStats from "@/components/company/projectStats";
 
 const ViewAllProjects = () => {
     const { toast } = useToast();
@@ -54,6 +55,7 @@ const ViewAllProjects = () => {
 
     return (
         <div className="container mx-auto px-4 py-24 max-w-7xl">
+            <ProjectStats />
             <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent pb-6">
                 All Projects
             </h1>
@@ -110,7 +112,7 @@ const ViewAllProjects = () => {
                         <CardFooter>
                             <NavLink
                                 className="w-full py-2 flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                                to={`/dashboard/student/my-projects/${project.project_id}`}
+                                to={`/dashboard/company/project-detail/${project.project_id}`}
                             >
                                 View Details
                             </NavLink>

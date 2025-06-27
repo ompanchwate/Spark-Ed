@@ -11,10 +11,11 @@ import {
   Eye
 } from "lucide-react";
 import { useUser } from '@/context/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const CompanyDashboard = () => {
   const { userDetails } = useUser();
-  console.log("userDetails", userDetails);
+  const navigate = useNavigate();
 
   // Mock data for demonstration
   const stats = {
@@ -31,7 +32,7 @@ const CompanyDashboard = () => {
           {/* Welcome Section */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-              Welcome back, {userDetails?.company_name || 'Company'}
+              Welcome back, {userDetails?.userDetails?.company_name || 'Company'}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
               Manage scholarships and review student projects from your dashboard.
@@ -43,7 +44,7 @@ const CompanyDashboard = () => {
             <Card className="bg-white/80 backdrop-blur-sm border-blue-200 dark:bg-gray-800/80 dark:border-blue-900">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Total Scholarships
+                  Total Added Scholarships
                 </CardTitle>
                 <GraduationCap className="h-4 w-4 text-blue-600" />
               </CardHeader>
@@ -100,7 +101,7 @@ const CompanyDashboard = () => {
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Create new scholarship opportunities for students
                 </p>
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                <Button onClick={() => navigate('addscholarship')} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
                   Create Scholarship
                 </Button>
               </CardContent>
@@ -118,7 +119,7 @@ const CompanyDashboard = () => {
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Manage and edit existing scholarship programs
                 </p>
-                <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white">
+                <Button onClick={() => navigate('scholarships')} className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white">
                   View Scholarships
                 </Button>
               </CardContent>
@@ -136,7 +137,7 @@ const CompanyDashboard = () => {
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
                   Review and evaluate student project submissions
                 </p>
-                <Button className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white">
+                <Button onClick={() => navigate('allprojects')} className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white">
                   View Projects
                 </Button>
               </CardContent>

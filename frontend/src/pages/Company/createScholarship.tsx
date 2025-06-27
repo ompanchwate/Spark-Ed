@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, FileText, Users, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-// import { createScholarship } from "@/api/api";
+import { createScholarship } from "@/api/companyApi";
+import Cookies from "js-cookie";
 
 const CreateScholarship = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const CreateScholarship = () => {
     eligibility_criteria: ""
   });
   const [isLoading, setIsLoading] = useState(false);
+  const token = Cookies.get("token")
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -35,18 +37,26 @@ const CreateScholarship = () => {
         ...formData,
         amount: parseFloat(formData.amount)
       };
-      
-    //   await createScholarship(scholarshipData);
-      
-      toast({
-        title: "Success!",
-        description: "Scholarship created successfully",
-        variant: "default"
-      });
-      
-      // Redirect to scholarships page
-      navigate("/scholarships");
-      
+      console.log(scholarshipData)
+
+      const response = await createScholarship(scholarshipData, token);
+
+      if (response.status === 201) {
+        toast({
+          title: "Success!",
+          description: "Scholarship created successfully",
+          variant: "default"
+        });
+        // Redirect to scholarships page
+        navigate("/dashboard/company/scholarships");
+      } else {
+        toast({
+          title: "Failed!",
+          description: "Failed to create scholarship. Please try again.",
+          variant: "default"
+        });
+      }
+
     } catch (error) {
       toast({
         title: "Error",
@@ -77,7 +87,7 @@ const CreateScholarship = () => {
               Scholarship Details
             </CardTitle>
           </CardHeader>
-          
+
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Scholarship Name */}

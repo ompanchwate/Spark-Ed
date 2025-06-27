@@ -15,7 +15,6 @@ export const validateToken = async (token) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log("res", res)
     return res;
   } catch (error) {
     return { valid: false, error: error.response?.data?.message || 'Invalid token' };

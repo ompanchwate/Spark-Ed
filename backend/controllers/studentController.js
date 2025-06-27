@@ -1,4 +1,5 @@
 import conn from "../db.js";
+
 export const editProfile = async (req, res) => {
   try {
     const { field, value } = req.body;
@@ -106,6 +107,19 @@ export const getStudents = async (req, res) => {
         res.json(rows);
     } catch (error) {
         console.error("Error fetching students:", error);
+        res.status(500).json({ message: "Server Error" });
+    }
+}
+
+export const fundingRequests = async (req, res) => {
+    try {
+        const stud_id = req.user?.userId;
+        const [rows] = await conn.query(
+            "SELECT request.*, c.company_name, p.name as project_name, p.description as project_description, p.requested_amount, s.name as student_name, s.stud_id as student_id FROM `project_funding_requests` as request INNER JOIN company c ON c.company_id = request.company_id INNER JOIN projects as p ON p.project_id = request.project_id INNER JOIN student as s ON s.stud_id = p.stud_id WHERE request.status = 'pending' AND s.stud_id = ?", [stud_id]
+        );
+        res.status(200).json(rows);
+    } catch (error) {
+        console.error("Error fetching funding requests:", error);
         res.status(500).json({ message: "Server Error" });
     }
 }

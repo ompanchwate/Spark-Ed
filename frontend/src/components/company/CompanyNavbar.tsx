@@ -65,8 +65,8 @@ export default function CompanyNavbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-8 ">
             <NavLink to="">Dashboard</NavLink>
-            <NavLink to="">Add Scholarship</NavLink>
-            <NavLink to="">Scholarships</NavLink>
+            <NavLink to="addscholarship">Add Scholarship</NavLink>
+            <NavLink to="scholarships">Scholarships</NavLink>
             <NavLink to="allprojects">All Projects</NavLink>
           </div>
 

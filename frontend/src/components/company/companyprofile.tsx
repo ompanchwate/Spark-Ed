@@ -5,24 +5,26 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { User, Mail, GraduationCap, Award, Edit, Save, X, Plus, Trash2 } from 'lucide-react';
-import { editStudProfile } from "@/api/studentsApi";
+import { User, Mail, GraduationCap, Award, Edit, Save, X, Plus, Trash2, MapPin, Navigation, Info, Phone, BookUser } from 'lucide-react';
 import Cookies from 'js-cookie';
 import { useToast } from '@/hooks/use-toast';
+import { editCompanyProfile } from '@/api/companyApi';
 
 const CompanyProfile = () => {
-  const { userDetails, setUserDetails } = useUser(); // Context
+  const { userDetails, setUserDetails } = useUser();
   const [isEditingName, setIsEditingName] = useState(false);
-  const [isEditingSkills, setIsEditingSkills] = useState(false);
-  const [isEditingEducation, setIsEditingEducation] = useState(false);
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
   const { toast } = useToast();
 
   const [editedName, setEditedName] = useState(userDetails?.userDetails?.name || '');
-  const [newSkill, setNewSkill] = useState('');
-  const [editedEducation, setEditedEducation] = useState([]);
+  const [editedAddress, setEditedAddress] = useState(userDetails?.userDetails?.location || '');
+  const [editedDescription, setEditedDescription] = useState(userDetails?.userDetails?.description || '');
+  const [editedPhone, setEditedPhone] = useState(userDetails?.userDetails?.description || '');
+
   const token = Cookies.get("token");
 
-  const skills = userDetails?.userDetails?.skills;
 
   const getInitials = (name: string) => {
     return name
@@ -32,23 +34,6 @@ const CompanyProfile = () => {
       .toUpperCase();
   };
 
-  // Parse the string to array
-  let parsedSkills = [];
-  let educationArray = [];
-
-  try {
-    educationArray = JSON.parse(userDetails?.userDetails?.education || "[]");
-    parsedSkills = JSON.parse(skills || "[]");
-
-    // Sort education by end year in descending order (most recent first)
-    educationArray.sort((a, b) => {
-      const endYearA = parseInt(a.endYear) || 0;
-      const endYearB = parseInt(b.endYear) || 0;
-      return endYearB - endYearA;
-    });
-  } catch (err) {
-    console.error("Error parsing data:", err);
-  }
 
   const handleNameSave = async () => {
     try {
@@ -61,8 +46,8 @@ const CompanyProfile = () => {
       }
 
       if (userDetails?.userDetails) {
-        const response = await editStudProfile(
-          { field: "name", value: editedName },
+        const response = await editCompanyProfile(
+          { field: "company_name", value: editedName },
           token
         );
 
@@ -76,9 +61,19 @@ const CompanyProfile = () => {
             ...userDetails,
             userDetails: {
               ...userDetails.userDetails,
-              name: editedName,
+              company_name: editedName,
             },
           });
+
+          const updated = {
+            ...userDetails,
+            userDetails: {
+              ...userDetails.userDetails,
+              company_name: editedName,
+            },
+          };
+
+          localStorage.setItem("details", JSON.stringify(updated)); // ✅ save to localStorage
 
           setIsEditingName(false);
         } else {
@@ -100,222 +95,182 @@ const CompanyProfile = () => {
   };
 
 
-  const handleAddSkill = async () => {
-    const trimmedSkill = newSkill.trim();
-
-    if (!trimmedSkill || !userDetails?.userDetails) return;
-
-    const updatedSkills = [...parsedSkills, trimmedSkill];
-
+  const handleAddressSave = async () => {
     try {
-      const response = await editStudProfile(
-        { field: "skills", value: JSON.stringify(updatedSkills) },
-        token
-      );
-
-      if (response.status === 200) {
-        toast({ title: "Skill added successfully!" });
-
-        setUserDetails((prev) => {
-          const updated = {
-            ...prev!,
-            userDetails: {
-              ...prev!.userDetails,
-              skills: JSON.stringify(updatedSkills),
-            },
-          };
-          localStorage.setItem("details", JSON.stringify(updated));
-          return updated;
-        });
-
-
-        setNewSkill("");
-      } else {
+      if (!editedAddress.trim()) {
         toast({
-          title: "Failed to add skill",
-          description: response.data?.message || "Try again later.",
+          title: "Address cannot be empty",
           variant: "destructive",
         });
+        return;
       }
-    } catch (error) {
-      console.error("Skill update error:", error);
-      toast({
-        title: "Error adding skill",
-        description: "Something went wrong.",
-        variant: "destructive",
-      });
-    }
-  };
 
+      if (userDetails?.userDetails) {
+        const response = await editCompanyProfile(
+          { field: "location", value: editedAddress },
+          token
+        );
 
-  const handleRemoveSkill = async (indexToRemove: number) => {
-    if (!userDetails?.userDetails) return;
+        if (response.status === 200) {
+          toast({
+            title: "Address updated successfully!",
+          });
 
-    const updatedSkills = parsedSkills.filter((_, index) => index !== indexToRemove);
-
-    try {
-      const response = await editStudProfile(
-        { field: "skills", value: JSON.stringify(updatedSkills) },
-        token
-      );
-
-      if (response.status === 200) {
-        toast({
-          title: "Skill removed successfully!",
-        });
-
-        setUserDetails((prev) => {
-          const updated = {
-            ...prev,
+          // Update context
+          setUserDetails({
+            ...userDetails,
             userDetails: {
-              ...prev!.userDetails,
-              skills: JSON.stringify(updatedSkills),
+              ...userDetails.userDetails,
+              location: editedAddress,
+            },
+          });
+
+          const updated = {
+            ...userDetails,
+            userDetails: {
+              ...userDetails.userDetails,
+              location: editedAddress,
             },
           };
-          localStorage.setItem("details", JSON.stringify(updated)); // <== ✅ Add this
-          return updated;
-        });
 
-      } else {
-        toast({
-          title: "Failed to remove skill",
-          description: response.data?.message || "Try again later.",
-          variant: "destructive",
-        });
+          localStorage.setItem("details", JSON.stringify(updated)); // ✅ save to localStorage
+
+          setIsEditingAddress(false);
+        } else {
+          toast({
+            title: "Failed to update address",
+            description: response.data?.message || "Try again later.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
-      console.error("Remove skill error:", error);
+      console.error("Address update error:", error);
       toast({
         title: "Something went wrong",
-        description: "Unable to remove skill.",
+        description: "Unable to update address.",
         variant: "destructive",
       });
     }
   };
 
-
-  const handleAddEducation = () => {
-    const newEducation = {
-      degree: '',
-      college: '',
-      startYear: '',
-      endYear: '',
-      location: ''
-    };
-    setEditedEducation([...editedEducation, newEducation]);
-  };
-
-  const handleEducationChange = (index: number, field: string, value: string) => {
-    const updated = [...editedEducation];
-    updated[index] = { ...updated[index], [field]: value };
-    setEditedEducation(updated);
-  };
-
-  const handleSaveEducation = async () => {
-    if (!userDetails?.userDetails) return;
-
-    const combinedEducation = [
-      ...educationArray,
-      ...editedEducation.filter(
-        (edu) =>
-          edu.degree?.trim() ||
-          edu.college?.trim() ||
-          edu.startYear?.trim() ||
-          edu.endYear?.trim() ||
-          edu.location?.trim()
-      ),
-    ];
-
-    combinedEducation.sort((a, b) => {
-      const endYearA = parseInt(a.endYear) || 0;
-      const endYearB = parseInt(b.endYear) || 0;
-      return endYearB - endYearA;
-    });
-
+  const handleDescriptionSave = async () => {
     try {
-      const response = await editStudProfile(
-        { field: "education", value: JSON.stringify(combinedEducation) },
-        token
-      );
-
-      if (response.status === 200) {
-        toast({ title: "Education updated successfully!" });
-
-        const updated = {
-          ...userDetails,
-          userDetails: {
-            ...userDetails.userDetails,
-            education: JSON.stringify(combinedEducation),
-          },
-        };
-
-        setUserDetails(updated);
-        localStorage.setItem("details", JSON.stringify(updated)); // ✅ save to localStorage
-
-        setEditedEducation([]);
-        setIsEditingEducation(false);
-      } else {
+      if (!editedDescription.trim()) {
         toast({
-          title: "Failed to update education",
-          description: response.data?.message || "Try again later.",
+          title: "Description cannot be empty",
           variant: "destructive",
         });
+        return;
+      }
+
+      if (userDetails?.userDetails) {
+        const response = await editCompanyProfile(
+          { field: "description", value: editedDescription },
+          token
+        );
+
+        if (response.status === 200) {
+          toast({
+            title: "Company Description updated successfully!",
+          });
+
+          // Update context
+          setUserDetails({
+            ...userDetails,
+            userDetails: {
+              ...userDetails.userDetails,
+              description: editedDescription,
+            },
+          });
+
+          const updated = {
+            ...userDetails,
+            userDetails: {
+              ...userDetails.userDetails,
+              description: editedDescription,
+            },
+          };
+
+          localStorage.setItem("details", JSON.stringify(updated)); // ✅ save to localStorage
+
+          setIsEditingDescription(false);
+        } else {
+          toast({
+            title: "Failed to update description",
+            description: response.data?.message || "Try again later.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
-      console.error("Education update error:", error);
+      console.error("description update error:", error);
       toast({
-        title: "Error updating education",
-        description: "Something went wrong.",
+        title: "Something went wrong",
+        description: "Unable to update description.",
         variant: "destructive",
       });
     }
   };
 
-
-  const handleRemoveEducation = async (indexToRemove: number) => {
-    if (!userDetails?.userDetails) return;
-
-    const confirmed = window.confirm("Are you sure you want to remove this education entry?");
-    if (!confirmed) return;
-
-    const updatedEducation = educationArray.filter((_, index) => index !== indexToRemove);
-
+  const handlePhoneSave = async () => {
     try {
-      const response = await editStudProfile(
-        { field: "education", value: JSON.stringify(updatedEducation) },
-        token
-      );
-
-      if (response.status === 200) {
-        toast({ title: "Education removed successfully!" });
-
-        const updated = {
-          ...userDetails,
-          userDetails: {
-            ...userDetails.userDetails,
-            education: JSON.stringify(updatedEducation),
-          },
-        };
-
-        setUserDetails(updated);
-        localStorage.setItem("details", JSON.stringify(updated));
-      } else {
+      if (!editedPhone.trim()) {
         toast({
-          title: "Failed to remove education",
-          description: response.data?.message || "Try again later.",
+          title: "phone cannot be empty",
           variant: "destructive",
         });
+        return;
+      }
+
+      if (userDetails?.userDetails) {
+        const response = await editCompanyProfile(
+          { field: "phone", value: editedPhone },
+          token
+        );
+
+        if (response.status === 200) {
+          toast({
+            title: "Company phone updated successfully!",
+          });
+
+          // Update context
+          setUserDetails({
+            ...userDetails,
+            userDetails: {
+              ...userDetails.userDetails,
+              phone: editedPhone,
+            },
+          });
+
+          const updated = {
+            ...userDetails,
+            userDetails: {
+              ...userDetails.userDetails,
+              phone: editedPhone,
+            },
+          };
+
+          localStorage.setItem("details", JSON.stringify(updated)); // ✅ save to localStorage
+
+          setIsEditingPhone(false);
+        } else {
+          toast({
+            title: "Failed to update description",
+            description: response.data?.message || "Try again later.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
-      console.error("Education remove error:", error);
+      console.error("description update error:", error);
       toast({
-        title: "Error removing education",
-        description: "Something went wrong.",
+        title: "Something went wrong",
+        description: "Unable to update description.",
         variant: "destructive",
       });
     }
   };
-
 
   return (
     <div className='dark:bg-slate-900'>
@@ -365,29 +320,8 @@ const CompanyProfile = () => {
             </CardHeader>
           </Card>
 
-          {/* Contact Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-blue-600" />
-                Location
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-500">{userDetails?.userDetails?.email || 'email@example.com'}</span>
-                </div>
-                {userDetails?.company_name && (
-                  <div className="flex items-center gap-3">
-                    <User className="h-4 w-4 text-gray-500" />
-                    <span className="text-gray-700">Company: {userDetails.company_name}</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+
+          {/* E-mail */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -411,28 +345,134 @@ const CompanyProfile = () => {
             </CardContent>
           </Card>
 
+          {/* Phone  */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-blue-600" />
-                Description
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BookUser  className="h-5 w-5 text-blue-600" />
+                  Phone
+                </div>
+                <Button size="sm" variant="outline" onClick={() => setIsEditingPhone(!isEditingPhone)}>
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  <span className="text-gray-500">{userDetails?.userDetails?.email || 'email@example.com'}</span>
-                </div>
-                {userDetails?.company_name && (
+                {isEditingPhone ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={editedPhone}
+                      onChange={(e) => setEditedPhone(e.target.value)}
+                      placeholder="Enter company phone"
+                      className="flex-1"
+                    />
+                    <Button size="sm" onClick={handlePhoneSave}>
+                      <Save className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setIsEditingPhone(false)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
                   <div className="flex items-center gap-3">
-                    <User className="h-4 w-4 text-gray-500" />
-                    <span className="text-gray-700">Company: {userDetails.company_name}</span>
+                    <Phone className="h-5 w-5 text-blue-600" />
+                    <span className="text-gray-500">{userDetails?.userDetails?.phone || 'Please add your company phone'}</span>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
+
+          {/* Location */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Navigation className="h-5 w-5 text-blue-600" />
+                  Address
+                </div>
+                <Button size="sm" variant="outline" onClick={() => setIsEditingAddress(!isEditingAddress)}>
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {isEditingAddress ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={editedAddress}
+                      onChange={(e) => setEditedAddress(e.target.value)}
+                      placeholder="Enter company address"
+                      className="flex-1"
+                    />
+                    <Button size="sm" onClick={handleAddressSave}>
+                      <Save className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setIsEditingAddress(false)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-4 w-4 text-gray-500" />
+                    <span className="text-gray-500">{userDetails?.userDetails?.location || 'Please add your address'}</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+
+
+
+
+
+          {/* Description  */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Info className="h-5 w-5 text-blue-600" />
+                  Description
+                </div>
+                <Button size="sm" variant="outline" onClick={() => setIsEditingDescription(!isEditingDescription)}>
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {isEditingDescription ? (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={editedDescription}
+                      onChange={(e) => setEditedDescription(e.target.value)}
+                      placeholder="Enter company description"
+                      className="flex-1"
+                    />
+                    <Button size="sm" onClick={handleDescriptionSave}>
+                      <Save className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setIsEditingDescription(false)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <Info className="h-5 w-5 text-blue-600" />
+                    <span className="text-gray-500">{userDetails?.userDetails?.description || 'Please add your company description'}</span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
 
 
 
