@@ -22,7 +22,7 @@ const config = {
 
 
 const conn = mysql.createPool(config);
-if (conn) console.log("Connected to MySQL database");
+if (conn) console.log("Connected to database");
 else console.log("Failed to connect to MySQL database");
 
 export default conn;
