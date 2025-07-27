@@ -68,6 +68,7 @@ export default function CompanyNavbar() {
             <NavLink to="addscholarship">Add Scholarship</NavLink>
             <NavLink to="scholarships">Scholarships</NavLink>
             <NavLink to="allprojects">All Projects</NavLink>
+            <NavLink to="negotiate">Negotiate Project</NavLink>
           </div>
 
           <div className="hidden md:flex items-center space-x-4">

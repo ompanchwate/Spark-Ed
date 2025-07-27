@@ -86,3 +86,45 @@ export const getFundingRequests = async(token) => {
         throw error;
     }
 }
+
+export const approveFundingRequest = async (requestId, token) => {
+    try {
+        const response = await API.post("/student/approve-request",requestId, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("❌ Error while approving funding request", error);
+        throw error;
+    }
+}
+
+export const rejectFundingRequest = async (requestId, token) => {
+    try {
+        const response = await API.post("/student/reject-request", requestId, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("❌ Error while rejecting funding request", error);
+        throw error;
+    }
+}
+
+export const negotiateFundingRequest = async (requestId, token) => {
+    try {
+        const response = await API.post("/student/negotiate-funding", requestId, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("❌ Error while negotiating funding request", error);
+        throw error;
+    }
+}

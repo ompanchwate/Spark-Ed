@@ -27,6 +27,7 @@ import CreateScholarship from "./pages/Company/createScholarship";
 import CompanyProjectDetails from "./pages/Company/CompanyprojectDetails";
 import FundingPending from "./pages/Company/companyfundingPending";
 import FundRequests from "./pages/Student/projectPending";
+import Negotiate from "./pages/Company/negotiate";
 
 const queryClient = new QueryClient();
 
@@ -40,7 +41,8 @@ const App = () => (
           <ThemeProvider>
             <Routes>
               {/* Auth Routes */}
-              <Route path="/" element={<Navigate to="/signin" />} />
+              <Route path="/" element={<Navigate to="/signin"/>} />
+              // <Route path="/" element={"Hello "} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/signup" element={<SignUp />} />
 
@@ -62,6 +64,7 @@ const App = () => (
                 <Route path="allprojects" element={<ViewAllProjects />} />
                 <Route path="project-detail/:id" element={<CompanyProjectDetails />} />
                 <Route path="pending-projects" element={<FundingPending />} />
+                <Route path="negotiate" element={<Negotiate />} />
               </Route>
 
               {/* Protected Student Routes */}

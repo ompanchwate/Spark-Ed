@@ -70,6 +70,7 @@ export default function StudentNavbar() {
             <NavLink to="/dashboard/student/scholarships">Scholarships</NavLink>
             <NavLink to="/dashboard/student/addproject">Add Project</NavLink>
             <NavLink to="/dashboard/student/myprojects">My Projects</NavLink>
+            <NavLink to="/dashboard/student/fundingrequests">Funding Requests</NavLink>
           </div>
 
           {/* Right Side Actions */}

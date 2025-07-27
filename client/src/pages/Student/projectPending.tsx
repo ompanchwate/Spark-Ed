@@ -1,21 +1,36 @@
-
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Search, Calendar, IndianRupee, User, Building, MessageSquare, CheckCircle, XCircle } from 'lucide-react'
+import { Search, Calendar, IndianRupee, User, Building, MessageSquare, CheckCircle, XCircle, Handshake, Video, ExternalLink } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { getFundingRequests } from '@/api/studentsApi'
+import { approveFundingRequest, getFundingRequests, negotiateFundingRequest, rejectFundingRequest } from '@/api/studentsApi'
 import Cookies from 'js-cookie'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface FundingRequest {
     id: number;
     company_id: number;
     project_id: number;
     message: string;
+    meeting_id: number;
+    meet_link?: string;
+    date_time?: string;
+    meeting_status?: string;
     amount: number;
     status: 'pending' | 'approved' | 'rejected';
+    negotiate: number;
+    negotiated_amount: number;
     timestamp: string;
     company_name: string;
     project_name: string;
@@ -37,9 +52,26 @@ interface GroupedProject {
     latest_request_date: string;
 }
 
+interface ConfirmationDialog {
+    isOpen: boolean;
+    type: 'approve' | 'reject' | 'negotiate' | null;
+    requestId: number | null;
+    companyName: string;
+    projectId: number | null;
+    amount: number;
+}
+
 const FundingPending = () => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [fundingRequests, setFundingRequests] = useState([]);
+    const [fundingRequests, setFundingRequests] = useState<FundingRequest[]>([]);
+    const [confirmationDialog, setConfirmationDialog] = useState<ConfirmationDialog>({
+        isOpen: false,
+        type: null,
+        requestId: null,
+        companyName: '',
+        projectId: null,
+        amount: 0
+    });
     const { toast } = useToast();
 
     useEffect(() => {
@@ -48,6 +80,8 @@ const FundingPending = () => {
                 const token = Cookies.get('token');
                 const response = await getFundingRequests(token);
                 setFundingRequests(response);
+                console.log(response)
+
             } catch (error) {
                 toast({
                     title: 'Error',
@@ -57,7 +91,7 @@ const FundingPending = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [toast]);
 
     const groupedProjects: GroupedProject[] = fundingRequests.reduce((acc: GroupedProject[], request) => {
         const existing = acc.find((p) => p.project_id === request.project_id);
@@ -102,19 +136,89 @@ const FundingPending = () => {
             day: 'numeric',
         });
 
-    const handleApprove = async (requestId: number, companyName: string) => {
-        toast({
-            title: 'Approved',
-            description: `Approved funding request from ${companyName}`,
+    const openApproveDialog = (requestId: number, companyName: string, projectId: number, amount: number) => {
+        setConfirmationDialog({
+            isOpen: true,
+            type: 'approve',
+            requestId,
+            companyName,
+            projectId,
+            amount
         });
     };
 
-    const handleReject = async (requestId: number, companyName: string) => {
-        toast({
-            title: 'Rejected',
-            description: `Rejected funding request from ${companyName}`,
-            variant: 'destructive',
+    const openRejectDialog = (requestId: number, companyName: string, amount: number) => {
+        setConfirmationDialog({
+            isOpen: true,
+            type: 'reject',
+            requestId,
+            companyName,
+            projectId: null,
+            amount
         });
+    };
+
+    const openNegotiateDialog = (requestId: number, companyName: string, amount: number) => {
+        setConfirmationDialog({
+            isOpen: true,
+            type: 'negotiate',
+            requestId,
+            companyName,
+            projectId: null,
+            amount
+        });
+    };
+
+    const closeDialog = () => {
+        setConfirmationDialog({
+            isOpen: false,
+            type: null,
+            requestId: null,
+            companyName: '',
+            projectId: null,
+            amount: 0
+        });
+    };
+
+    const handleConfirmAction = async () => {
+        if (!confirmationDialog.requestId || !confirmationDialog.type) return;
+
+        try {
+            const token = Cookies.get('token');
+
+            if (confirmationDialog.type === 'approve') {
+                await approveFundingRequest({ requestId: confirmationDialog.requestId }, token);
+                toast({
+                    title: 'Approved',
+                    description: `Approved funding request from ${confirmationDialog.companyName} and rejected others.`,
+                });
+            } else if (confirmationDialog.type === 'reject') {
+                await rejectFundingRequest({ requestId: confirmationDialog.requestId }, token);
+                toast({
+                    title: 'Rejected',
+                    description: `Rejected funding request from ${confirmationDialog.companyName}.`,
+                    variant: 'destructive',
+                });
+            } else {
+                await negotiateFundingRequest({ requestId: confirmationDialog.requestId }, token);
+                toast({
+                    title: 'Negotiate Offer',
+                    description: `Negotiate request sent to ${confirmationDialog.companyName}.`,
+                });
+            }
+
+            // Re-fetch updated data
+            const refreshed = await getFundingRequests(token);
+            setFundingRequests(refreshed);
+            closeDialog();
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: `Something went wrong while ${confirmationDialog.type === 'approve' ? 'approving' : 'rejecting'} the request.`,
+                variant: 'destructive',
+            });
+            closeDialog();
+        }
     };
 
     const totalPendingRequests = fundingRequests.filter((r) => r.status === 'pending').length;
@@ -194,7 +298,7 @@ const FundingPending = () => {
             {/* Projects with Funding Requests */}
             <div className="space-y-8">
                 {filteredProjects.map((project) => (
-                    <Card key={project.project_id} className="border-l-4 border-l-indigo-500">
+                    <Card key={project.project_id} className="border-l-4 border-l-indigo-500 shadow-lg hover:shadow-xl transition-shadow duration-300">
                         <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
@@ -205,14 +309,13 @@ const FundingPending = () => {
                                         {project.project_description}
                                     </p>
                                     <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-
                                         <div className="flex items-center gap-1">
                                             <MessageSquare className="h-4 w-4" />
                                             {project.requests.length} funding request{project.requests.length > 1 ? 's' : ''}
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <IndianRupee className="h-4 w-4" />
-                                            Requested Amount : {formatCurrency(project.requested_amount)}
+                                            Requested: {formatCurrency(project.requested_amount)}
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <IndianRupee className="h-4 w-4" />
@@ -220,7 +323,7 @@ const FundingPending = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <Badge className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400">
+                                <Badge className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400 text-lg px-4 py-2">
                                     {project.requests.length} OFFER{project.requests.length > 1 ? 'S' : ''}
                                 </Badge>
                             </div>
@@ -231,8 +334,12 @@ const FundingPending = () => {
                                 {project.requests.map((request, index) => (
                                     <div
                                         key={request.id}
-                                        className={`p-6 ${index !== project.requests.length - 1 ? 'border-b border-gray-200 dark:border-gray-700' : ''}`}
+                                        className={`p-6 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors duration-200 ${index !== project.requests.length - 1
+                                            ? 'border-b border-gray-200 dark:border-gray-700'
+                                            : ''
+                                            }`}
                                     >
+                                        {/* Header */}
                                         <div className="flex items-start justify-between mb-4">
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-4 mb-3">
@@ -242,6 +349,11 @@ const FundingPending = () => {
                                                     <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400">
                                                         PENDING
                                                     </Badge>
+                                                    {request.negotiate === 1 && (
+                                                        <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-orange-400">
+                                                            NEGOTIATING
+                                                        </Badge>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
                                                     <div className="flex items-center gap-1">
@@ -252,8 +364,11 @@ const FundingPending = () => {
                                             </div>
                                         </div>
 
+                                        {/* Company Message */}
                                         <div className="mb-6">
-                                            <h5 className="font-medium text-gray-900 dark:text-white mb-2">Company Message:</h5>
+                                            <h5 className="font-medium text-gray-900 dark:text-white mb-2">
+                                                Company Message:
+                                            </h5>
                                             <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border-l-4 border-l-blue-500">
                                                 <p className="text-gray-700 dark:text-gray-300 italic">
                                                     "{request.message}"
@@ -261,27 +376,115 @@ const FundingPending = () => {
                                             </div>
                                         </div>
 
+                                        {/* Meeting Info */}
+                                        {request.meet_link && request.meeting_status !== 'completed' && (
+                                            <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg shadow-md border border-blue-200 dark:border-blue-700">
+                                                <h5 className="font-medium text-blue-900 dark:text-blue-300 mb-3 flex items-center gap-2">
+                                                    <Video className="h-5 w-5 text-blue-600" />
+                                                    Scheduled Meeting
+                                                </h5>
+
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                                    <span className="text-blue-700 dark:text-blue-300 text-sm">
+                                                        {request.date_time &&
+                                                            new Date(request.date_time).toLocaleString('en-IN', {
+                                                                timeZone: 'Asia/Kolkata',
+                                                                weekday: 'short',
+                                                                day: '2-digit',
+                                                                month: 'short',
+                                                                year: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit',
+                                                                hour12: true,
+                                                            })}
+                                                    </span>
+
+                                                    <a
+                                                        href={request.meet_link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-lg shadow-lg transition-transform transform hover:scale-105"
+                                                    >
+                                                        <ExternalLink className="h-4 w-4" />
+                                                        Join Meeting
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* ✅ Meeting Completed & Negotiated Offer */}
+                                        {request.meeting_status === 'completed' && request.negotiated_amount && (
+                                            <div className="mb-6 bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-300 dark:border-green-700 shadow-sm">
+                                                <h5 className="font-medium text-green-900 dark:text-green-300 mb-2 flex items-center gap-2">
+                                                    <CheckCircle className="h-5 w-5 text-green-600" />
+                                                    Meeting Completed
+                                                </h5>
+                                                <p className="text-green-800 dark:text-green-200 text-sm mb-3">
+                                                    The company has updated their offer after negotiation.
+                                                </p>
+
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-lg font-semibold text-green-700 dark:text-green-400">
+                                                        New Offer: {formatCurrency(request.negotiated_amount)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Default Action Buttons */}
                                         <div className="flex items-center justify-between">
                                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                                                Funding offer: <span className="font-semibold text-green-600 dark:text-green-400 text-lg">
+                                                Funding offer:{' '}
+                                                <span className="font-semibold text-green-600 dark:text-green-400 text-xl">
                                                     {formatCurrency(request.amount)}
                                                 </span>
                                             </div>
+
                                             <div className="flex items-center gap-3">
                                                 <Button
+                                                    onClick={() =>
+                                                        openApproveDialog(
+                                                            request.id,
+                                                            request.company_name,
+                                                            request.project_id,
+                                                            request.amount
+                                                        )
+                                                    }
+                                                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 shadow-md hover:shadow-lg transition-all duration-200"
+                                                >
+                                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                                    Accept offer
+                                                </Button>
+
+                                                <Button
                                                     variant="outline"
-                                                    onClick={() => handleReject(request.id, request.company_name)}
-                                                    className="text-red-600 border-red-200 hover:bg-red-50 dark:text-red-400 dark:border-red-800 dark:hover:bg-red-900/20"
+                                                    onClick={() =>
+                                                        openNegotiateDialog(
+                                                            request.id,
+                                                            request.company_name,
+                                                            request.amount
+                                                        )
+                                                    }
+                                                    disabled={request?.negotiate === 1}
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 shadow-md hover:shadow-lg transition-all duration-200"
+                                                >
+                                                    <Handshake className="h-4 w-4 mr-2" />
+                                                    {request?.negotiate ? 'Negotiating' : 'Negotiate Offer'}
+                                                </Button>
+
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={() =>
+                                                        openRejectDialog(
+                                                            request.id,
+                                                            request.company_name,
+                                                            request.amount
+                                                        )
+                                                    }
+                                                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 shadow-md hover:shadow-lg transition-all duration-200"
                                                 >
                                                     <XCircle className="h-4 w-4 mr-2" />
                                                     Reject Offer
-                                                </Button>
-                                                <Button
-                                                    onClick={() => handleApprove(request.id, request.company_name)}
-                                                    className="bg-green-600 hover:bg-green-700 text-white"
-                                                >
-                                                    <CheckCircle className="h-4 w-4 mr-2" />
-                                                    Accept Funding
                                                 </Button>
                                             </div>
                                         </div>
@@ -289,24 +492,103 @@ const FundingPending = () => {
                                 ))}
                             </div>
                         </CardContent>
+
                     </Card>
                 ))}
             </div>
 
-            {filteredProjects.length === 0 && (
-                <div className="text-center py-12">
-                    <div className="text-gray-400 dark:text-gray-600 mb-4">
-                        <MessageSquare className="h-12 w-12 mx-auto mb-4" />
+            {
+                filteredProjects.length === 0 && (
+                    <div className="text-center py-12">
+                        <div className="text-gray-400 dark:text-gray-600 mb-4">
+                            <MessageSquare className="h-12 w-12 mx-auto mb-4" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                            No funding requests found
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400">
+                            {searchTerm ? 'Try adjusting your search criteria' : 'You have no pending funding requests at the moment'}
+                        </p>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                        No funding requests found
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                        {searchTerm ? 'Try adjusting your search criteria' : 'You have no pending funding requests at the moment'}
-                    </p>
-                </div>
-            )}
-        </div>
+                )
+            }
+
+            {/* Confirmation Dialog */}
+            <AlertDialog open={confirmationDialog.isOpen} onOpenChange={closeDialog}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-xl font-bold">
+                            {confirmationDialog.type === 'approve' ?
+                                'Accept Funding Offer' : confirmationDialog.type === 'reject' ?
+                                    'Reject Funding Offer' : 'Negotiate Funding Offer'
+
+                            }
+
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
+                            {confirmationDialog.type === 'approve' ? (
+                                <>
+                                    <p className="mb-3">
+                                        Are you sure you want to accept the funding offer of{' '}
+                                        <span className="font-semibold text-green-600">
+                                            {formatCurrency(confirmationDialog.amount)}
+                                        </span>{' '}
+                                        from <strong>{confirmationDialog.companyName}</strong>?
+                                    </p>
+                                    <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                                            ⚠️ <strong>Important:</strong> Accepting this offer will automatically reject all other funding offers for this project.
+                                        </p>
+                                    </div>
+                                </>
+                            ) : confirmationDialog.type === 'reject' ? (
+                                <p>
+                                    Are you sure you want to reject the funding offer of{' '}
+                                    <span className="font-semibold text-red-600">
+                                        {formatCurrency(confirmationDialog.amount)}
+                                    </span>{' '}
+                                    from <strong>{confirmationDialog.companyName}</strong>?
+                                </p>
+                            ) : <p>
+                                Are you sure you want to Negotiate the funding offer of{' '}
+                                <span className="font-semibold text-blue-600">
+                                    {formatCurrency(confirmationDialog.amount)}
+                                </span>{' '}
+                                from <strong>{confirmationDialog.companyName}</strong>?
+                            </p>}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={closeDialog}>
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleConfirmAction}
+                            className={`
+                                ${confirmationDialog.type === 'approve'
+                                    ? 'bg-green-600 hover:bg-green-700'
+                                    : `${confirmationDialog.type === 'reject' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                                    }`}`}
+                        >
+                            {confirmationDialog.type === 'approve' ? (
+                                <>
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    Accept Offer
+                                </>
+                            ) : confirmationDialog.type === 'reject' ? (
+                                <>
+                                    <XCircle className="h-4 w-4 mr-2" />
+                                    Reject Offer
+                                </>
+                            ) : <>
+                                <Handshake className="h-4 w-4 mr-2" />
+                                Negotiate Offer
+                            </>}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </div >
     )
 }
 

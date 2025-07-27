@@ -1,5 +1,5 @@
 import express from "express";
-import { addProject, myProjects, getProjectById, editProjectById, editProfile, fundingRequests } from "../controllers/studentController.js";
+import { addProject, myProjects, getProjectById, editProjectById, editProfile, fundingRequests, approveFundingRequest, rejectFundingRequest, negotiateFundingRequest } from "../controllers/studentController.js";
 import { verifyToken } from "../middlewares/auth.js";
 
 const router = express.Router();
@@ -12,6 +12,9 @@ router.get("/myproject/:id", verifyToken, getProjectById)
 router.put("/editproject/:id", verifyToken, editProjectById)
 router.put("/editprofile", verifyToken, editProfile)
 router.get("/fundingrequests", verifyToken, fundingRequests)
+router.post("/approve-request", verifyToken, approveFundingRequest)
+router.post("/reject-request", verifyToken, rejectFundingRequest)
+router.post("/negotiate-funding", verifyToken, negotiateFundingRequest);
 
 
 export default router;
