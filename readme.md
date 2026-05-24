@@ -193,10 +193,12 @@ Supports project funding approval and negotiation flow between companies and stu
 
 # 📸 Screenshots
 
-Add project screenshots here.
 
 ```md
-![Home Page](./screenshots/home.png)
+##Login Page
+<img width="2549" height="1273" alt="image" src="https://github.com/user-attachments/assets/b7e1f9f4-295b-4f4b-ac65-4cfa7701c7f2" />
+
+
 ```
 
 ---
