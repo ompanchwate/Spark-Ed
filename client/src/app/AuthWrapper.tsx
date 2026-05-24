@@ -9,10 +9,10 @@ export const AuthWrapper = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = Cookies.get("token");
-      if (!token) {
-        navigate("/signin");
-        return;
-      }
+      // if (!token) {
+      //   navigate("/signin");
+      //   return;
+      // }
 
       const response = await validateToken(token);
       if (response.status !== 200) {
