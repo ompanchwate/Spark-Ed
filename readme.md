@@ -138,6 +138,7 @@ DB_PASS=your_database_password
 DB_HOST=localhost
 DB_NAME=your_database_name
 JWT_SECRET=your_jwt_secret
+GOOGLE_REFRESH_TOKEN=your_refresh_token
 
 ```
 
