@@ -129,9 +129,10 @@ export const getNegotiationRequest = async (req, res) => {
             return res.status(400).json({ message: "Missing company ID" });
         }
 
-        const [rows] = await conn.query(
-            "SELECT request.*, p.name as project_name, p.description as project_description, p.requested_amount, s.name as student_name, s.stud_id as student_id, meeting.* FROM `project_funding_requests` as request LEFT JOIN meetings as meeting ON request.id = meeting.funding_request_id INNER JOIN projects as p ON p.project_id = request.project_id INNER JOIN student as s ON s.stud_id = p.stud_id WHERE request.negotiate = 1 AND request.company_id", [company_id]
-        );
+        // const [rows] = await conn.query(
+        //     "SELECT request.*, p.name as project_name, p.description as project_description, p.requested_amount, s.name as student_name, s.stud_id as student_id FROM `project_funding_requests` as request INNER JOIN projects as p ON p.project_id = request.project_id INNER JOIN student as s ON s.stud_id = p.stud_id WHERE request.negotiate = 1 AND request.company_id", [company_id]
+        // );
+       const [rows] = await conn.query(`SELECT request.*, p.name AS project_name, p.description AS project_description, p.requested_amount, s.name AS student_name, s.stud_id AS student_id, meeting.id AS meeting_id, meeting.summary, meeting.meet_link, meeting.date_time, meeting.meeting_status, meeting.created_at AS meeting_created_at FROM project_funding_requests AS request LEFT JOIN meetings AS meeting ON request.id = meeting.funding_request_id INNER JOIN projects AS p ON p.project_id = request.project_id INNER JOIN student AS s ON s.stud_id = p.stud_id WHERE request.negotiate = 1 AND request.company_id = ?`, [company_id]);
 
         if (rows.length === 0) {
             return res.status(404).json({ message: "Project not found" });
@@ -232,7 +233,7 @@ export const markCompleted = async (req, res) => {
         console.log(meetingId)
 
         // Update the meeting status to completed
-        await conn.query("UPDATE meetings SET meeting_status = 'completed' WHERE meeting_id = ?", [meetingId]);
+        await conn.query("UPDATE meetings SET meeting_status = 'completed' WHERE id = ?", [meetingId]);
 
         return res.status(200).json({ message: "Meeting marked as completed" });
     } catch (error) {

@@ -225,6 +225,7 @@ const FundingPending = () => {
     const totalOfferedAmount = fundingRequests.reduce((sum, r) => sum + r.amount, 0);
     const uniqueCompanies = new Set(fundingRequests.map((r) => r.company_id)).size;
 
+
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl mt-16 mb-2">
             {/* Header */}
@@ -413,7 +414,7 @@ const FundingPending = () => {
                                         )}
 
                                         {/* ✅ Meeting Completed & Negotiated Offer */}
-                                        {request.meeting_status === 'completed' && request.negotiated_amount && (
+                                        {request.meeting_status === 'COMPLETED' && request.negotiated_amount !== 0 && (
                                             <div className="mb-6 bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-300 dark:border-green-700 shadow-sm">
                                                 <h5 className="font-medium text-green-900 dark:text-green-300 mb-2 flex items-center gap-2">
                                                     <CheckCircle className="h-5 w-5 text-green-600" />

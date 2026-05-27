@@ -192,6 +192,7 @@ const Negotiation = () => {
         });
 
     const scheduleMeeting = async () => {
+        console.log(meetingDate,  meetingTime,meetingDialog )
         if (!meetingDate || !meetingTime || !meetingDialog.requestId) {
             toast({
                 title: "Error",

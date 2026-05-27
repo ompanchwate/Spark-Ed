@@ -1,21 +1,28 @@
 import fs from "fs";
+import path from "path";
 import { google } from "googleapis";
+import dotenv from "dotenv";
 
-const CREDENTIALS_PATH = "./credentials.json";
-const TOKEN_PATH = "./token.json";
+dotenv.config();
 
-export async function getAuthClient() {
-  const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH, "utf8"));
-  const { client_secret, client_id, redirect_uris } = credentials.web;
+const credentialsPath = path.join(process.cwd(), "credentials.json");
 
+const credentials = JSON.parse(
+  fs.readFileSync(credentialsPath, "utf8")
+);
+
+const { client_secret, client_id, redirect_uris } = credentials.web;
+
+export const getAuthClient = () => {
   const oAuth2Client = new google.auth.OAuth2(
     client_id,
     client_secret,
     redirect_uris[0]
   );
 
-  const token = JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"));
-  oAuth2Client.setCredentials(token);
+  oAuth2Client.setCredentials({
+    refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+  });
 
   return oAuth2Client;
-}
+};
